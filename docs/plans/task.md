@@ -21,3 +21,8 @@
 | TASK-19 | Data: Linux DBus MPRIS Client | Completed | TASK-18 |
 | TASK-20 | Data: SpotifyService Orchestrator & UI Bridge | Completed | TASK-19 |
 | TASK-21 | Data: Full Verification & Live Demonstration | Completed | TASK-20 |
+| TASK-22 | System: System Types & Contracts | Completed | TASK-21 |
+| TASK-23 | System: HotkeyManager & Action Dispatcher | Completed | TASK-22 |
+| TASK-24 | System: Dynamic Tray Menu Builder & Manager | Completed | TASK-23 |
+| TASK-25 | System: SystemController Orchestrator | Completed | TASK-24 |
+| TASK-26 | System: Full Verification & Demonstration | Completed | TASK-25 |
