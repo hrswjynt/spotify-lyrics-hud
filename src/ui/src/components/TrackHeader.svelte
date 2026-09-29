@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentTrack, playbackState, togglePlayPause } from '../stores/playback.js';
+  import { currentTrack, karaokeMode, playbackState, toggleKaraokeMode, togglePlayPause } from '../stores/playback.js';
   import { formatTimestamp } from '../sync/lyrics-sync.js';
 
   $: progressPercent = $currentTrack && $currentTrack.durationMs > 0
@@ -34,8 +34,21 @@
       </div>
     </div>
 
-    <!-- Playback controls -->
+    <!-- Playback & Feature controls -->
     <div class="flex items-center gap-2">
+      <!-- Karaoke Mode Toggle Button -->
+      <button
+        type="button"
+        on:click={toggleKaraokeMode}
+        class="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border {$karaokeMode ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400/50 shadow-[0_0_12px_rgba(52,211,153,0.35)]' : 'bg-white/10 hover:bg-white/20 text-white/40 border-white/10'} active:scale-95"
+        title={$karaokeMode ? 'Karaoke Wipe: ON (Click to switch to Solid Glow)' : 'Karaoke Wipe: OFF (Click to switch to Gradient Wipe)'}
+      >
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </button>
+
       <button
         type="button"
         on:click={togglePlayPause}

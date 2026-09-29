@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { karaokeMode } from '../stores/playback.js';
+
   export let text: string = '';
   export let isActive: boolean = false;
   export let isPast: boolean = false;
@@ -16,16 +18,22 @@
       : 'scale-98 font-medium opacity-55 hover:opacity-80'}"
 >
   {#if isActive}
-    <p
-      class="text-xl md:text-2xl tracking-wide leading-relaxed inline-block"
-      style="
-        background: linear-gradient(to right, #34d399 0%, #38bdf8 {fillPercent}%, #ffffff {fillPercent}%, #ffffff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      "
-    >
-      {text}
-    </p>
+    {#if $karaokeMode}
+      <p
+        class="text-xl md:text-2xl tracking-wide leading-relaxed inline-block"
+        style="
+          background: linear-gradient(to right, #34d399 0%, #38bdf8 {fillPercent}%, #ffffff {fillPercent}%, #ffffff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        {text}
+      </p>
+    {:else}
+      <p class="text-xl md:text-2xl tracking-wide leading-relaxed inline-block text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]">
+        {text}
+      </p>
+    {/if}
   {:else}
     <p class="text-base md:text-lg text-white tracking-normal leading-relaxed">
       {text}
