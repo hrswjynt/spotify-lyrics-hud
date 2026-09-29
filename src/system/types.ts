@@ -6,7 +6,9 @@ export type HotkeyAction =
   | 'cycle_monitor'
   | 'play_pause'
   | 'next_track'
-  | 'prev_track';
+  | 'prev_track'
+  | 'toggle_karaoke'
+  | 'toggle-karaoke';
 
 export interface HotkeyBinding {
   accelerator: string; // e.g. "Ctrl+Shift+X"

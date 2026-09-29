@@ -5,6 +5,7 @@ import { TrayMenu, TrayMenuItem } from '../types.js';
 export interface TrayMenuCallbacks {
   onToggleClickThrough: () => void;
   onToggleVisibility: () => void;
+  onToggleKaraoke?: () => void;
   onSelectDisplay: (displayId: string) => void;
   onSelectAnchor: (anchor: Anchor) => void;
   onPlayPause: () => void;
@@ -19,6 +20,7 @@ export interface TrayMenuBuildOptions {
   inputMode: InputMode;
   visible: boolean;
   currentAnchor: Anchor;
+  karaokeMode?: boolean;
   isPlaying: boolean;
   currentTrack?: SpotifyTrack | null;
   callbacks: TrayMenuCallbacks;
@@ -46,6 +48,7 @@ export function buildTrayMenu(options: TrayMenuBuildOptions): TrayMenu {
     inputMode,
     visible,
     currentAnchor,
+    karaokeMode,
     isPlaying,
     currentTrack,
     callbacks,
@@ -88,6 +91,16 @@ export function buildTrayMenu(options: TrayMenuBuildOptions): TrayMenu {
     checked: visible,
     shortcut: 'Ctrl+Shift+H',
     action: callbacks.onToggleVisibility,
+  });
+
+  // 3b. Karaoke Wipe mode toggle
+  items.push({
+    id: 'karaoke_mode',
+    label: karaokeMode !== false ? '🎤 Karaoke Wipe (ON)' : '🎤 Karaoke Wipe (OFF)',
+    type: 'checkbox',
+    checked: karaokeMode !== false,
+    shortcut: 'Ctrl+Shift+K',
+    action: callbacks.onToggleKaraoke,
   });
 
   items.push({ id: 'sep_2', label: '', type: 'separator' });

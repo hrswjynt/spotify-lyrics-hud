@@ -72,5 +72,6 @@ describe('HotkeyManager & Action Dispatcher', () => {
     expect(bindings.some((b) => b.action === 'toggle_click_through')).toBe(true);
     expect(bindings.some((b) => b.action === 'toggle_visibility')).toBe(true);
     expect(bindings.some((b) => b.action === 'cycle_monitor')).toBe(true);
+    expect(bindings.some((b) => (b.action === 'toggle_karaoke' || b.action === 'toggle-karaoke') && b.accelerator === 'Ctrl+Shift+K')).toBe(true);
   });
 });

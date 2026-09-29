@@ -11,6 +11,8 @@ export interface SystemControllerOptions {
   spotifyService?: SpotifyService;
   hotkeyManager?: HotkeyManager;
   trayManager?: TrayManager;
+  karaokeMode?: boolean;
+  onToggleKaraoke?: (enabled: boolean) => void;
 }
 
 export class SystemController {
@@ -19,6 +21,8 @@ export class SystemController {
   private spotifyService?: SpotifyService;
   private hotkeyManager: HotkeyManager;
   private trayManager: TrayManager;
+  private karaokeMode: boolean = true;
+  private onToggleKaraokeCallback?: (enabled: boolean) => void;
 
   private displays: Display[] = [];
   private unsubs: Array<() => void> = [];
@@ -29,6 +33,8 @@ export class SystemController {
     this.spotifyService = options.spotifyService;
     this.hotkeyManager = options.hotkeyManager || new HotkeyManager();
     this.trayManager = options.trayManager || new TrayManager();
+    this.karaokeMode = options.karaokeMode ?? true;
+    this.onToggleKaraokeCallback = options.onToggleKaraoke;
 
     this.hotkeyManager.registerDefaultBindings();
     this.setupHotkeyHandlers();
@@ -67,6 +73,14 @@ export class SystemController {
 
     this.hotkeyManager.setHandler('play_pause', async () => {
       await this.playPause();
+    });
+
+    this.hotkeyManager.setHandler('toggle_karaoke', async () => {
+      await this.toggleKaraoke();
+    });
+
+    this.hotkeyManager.setHandler('toggle-karaoke', async () => {
+      await this.toggleKaraoke();
     });
   }
 
@@ -173,6 +187,23 @@ export class SystemController {
     }
   }
 
+  public isKaraokeMode(): boolean {
+    return this.karaokeMode;
+  }
+
+  public async setKaraokeMode(enabled: boolean): Promise<void> {
+    this.karaokeMode = enabled;
+    this.onToggleKaraokeCallback?.(this.karaokeMode);
+    await this.refreshTrayMenu();
+  }
+
+  public async toggleKaraoke(): Promise<boolean> {
+    this.karaokeMode = !this.karaokeMode;
+    this.onToggleKaraokeCallback?.(this.karaokeMode);
+    await this.refreshTrayMenu();
+    return this.karaokeMode;
+  }
+
   public async refreshTrayMenu(): Promise<void> {
     const intent = this.engine.getIntent();
     const resolved = this.engine.getLastResolvedState();
@@ -228,11 +259,13 @@ export class SystemController {
       inputMode: intent.interaction.pointer,
       visible: intent.visible,
       currentAnchor: intent.placement.anchor,
+      karaokeMode: this.karaokeMode,
       isPlaying: this.spotifyService ? this.spotifyService.getIsPlaying() : false,
       currentTrack: this.spotifyService ? this.spotifyService.getCurrentTrack() : null,
       callbacks: {
         onToggleClickThrough: () => void this.toggleClickThrough(),
         onToggleVisibility: () => void this.toggleVisibility(),
+        onToggleKaraoke: () => void this.toggleKaraoke(),
         onSelectDisplay: (id) => void this.setDisplay(id),
         onSelectAnchor: (anchor) => void this.setAnchor(anchor),
         onPlayPause: () => void this.playPause(),

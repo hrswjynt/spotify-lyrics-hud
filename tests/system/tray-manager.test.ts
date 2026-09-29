@@ -74,6 +74,12 @@ describe('Dynamic Tray Menu Builder & TrayManager', () => {
     // Click first display
     displaysSubmenu?.children?.[0].action?.();
     expect(onSelectDisplay).toHaveBeenCalledWith('eDP-1');
+
+    // 4. Check Karaoke Mode checkbox
+    const karaokeItem = menu.items.find((i) => i.id === 'karaoke_mode');
+    expect(karaokeItem).toBeDefined();
+    expect(karaokeItem?.checked).toBe(true);
+    expect(karaokeItem?.shortcut).toBe('Ctrl+Shift+K');
   });
 
   it('TrayManager manages menu state and event routing', () => {

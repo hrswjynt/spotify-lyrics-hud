@@ -139,4 +139,31 @@ describe('SystemController Orchestrator', () => {
 
     controller.dispose();
   });
+
+  it('toggles karaoke mode via hotkey trigger Ctrl+Shift+K', async () => {
+    const { engine, mockDisplayProvider } = createTestHarness();
+    await engine.start();
+
+    const onToggleKaraoke = vi.fn();
+    const controller = new SystemController({
+      engine,
+      displayProvider: mockDisplayProvider,
+      onToggleKaraoke,
+    });
+    await controller.start();
+
+    expect(controller.isKaraokeMode()).toBe(true);
+
+    // Trigger Ctrl+Shift+K
+    await controller.getHotkeyManager().trigger('Ctrl+Shift+K');
+    expect(controller.isKaraokeMode()).toBe(false);
+    expect(onToggleKaraoke).toHaveBeenCalledWith(false);
+
+    // Trigger again
+    await controller.getHotkeyManager().trigger('Ctrl+Shift+K');
+    expect(controller.isKaraokeMode()).toBe(true);
+    expect(onToggleKaraoke).toHaveBeenCalledWith(true);
+
+    controller.dispose();
+  });
 });

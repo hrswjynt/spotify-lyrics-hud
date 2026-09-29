@@ -128,6 +128,12 @@ export class HotkeyManager {
       action: 'play_pause',
       description: 'Toggle Spotify Play/Pause',
     });
+
+    this.register({
+      accelerator: 'Ctrl+Shift+K',
+      action: 'toggle_karaoke',
+      description: 'Toggle Karaoke Wipe Animation',
+    });
   }
 
   public dispose(): void {
