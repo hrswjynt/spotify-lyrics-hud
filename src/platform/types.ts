@@ -10,7 +10,7 @@ import {
  */
 export interface PlatformAdapter {
   readonly platform: 'linux' | 'windows' | 'darwin';
-  readonly backend: 'wayland' | 'win32' | 'mock';
+  readonly backend: 'wayland' | 'win32' | 'mock' | 'tauri';
   readonly compositor?: string;
 
   getCapabilities(): PlatformCapabilities;
