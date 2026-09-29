@@ -15,7 +15,7 @@
         "title": "Desktop Overlay HUD",
         "label": "main",
         "width": 750,
-        "height": 220,
+        "height": 275,
         "resizable": false,
         "transparent": true,
         "decorations": false,

@@ -34,7 +34,7 @@ export async function initTauriRuntime(): Promise<{
       placement: {
         anchor: 'bottom-center',
         offset: { x: 0, y: -48 },
-        size: { width: 750, height: 220 },
+        size: { width: 750, height: 275 },
         relativeTo: 'workArea',
       },
       zOrder: 'overlay',
@@ -50,7 +50,7 @@ export async function initTauriRuntime(): Promise<{
   });
 
   await engine.start();
-  void invoke('log_from_js', { level: 'INFO', msg: 'OverlayEngine started with size 750x220' });
+  void invoke('log_from_js', { level: 'INFO', msg: 'OverlayEngine started with size 750x275' });
 
   const mprisRunner = new TauriMprisRunner(invoke);
   const mprisClient = new DbusMprisClient(mprisRunner);

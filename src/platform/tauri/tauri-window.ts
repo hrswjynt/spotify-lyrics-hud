@@ -21,7 +21,7 @@ export class TauriOverlayWindow implements OverlayWindow {
     this.state = {
       created: false,
       visible: false,
-      geometry: { x: 0, y: 0, width: 750, height: 220 },
+      geometry: { x: 0, y: 0, width: 750, height: 275 },
       displayId: 'primary',
       zOrder: 'overlay',
       inputMode: 'passthrough',
