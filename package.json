@@ -1,0 +1,27 @@
+{
+  "name": "desktop-overlay",
+  "version": "1.0.0",
+  "description": "Cross-Platform Native Desktop Overlay Architecture and Implementation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc"
+  },
+  "keywords": [
+    "desktop-overlay",
+    "wayland",
+    "hyprland",
+    "win32",
+    "layer-shell"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
+  }
+}
