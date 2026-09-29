@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default permissions for Desktop Overlay",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

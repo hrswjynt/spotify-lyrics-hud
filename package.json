@@ -10,7 +10,10 @@
     "test:watch": "vitest",
     "build": "tsc",
     "build:ui": "vite build --config src/ui/vite.config.ts",
-    "dev:ui": "vite --config src/ui/vite.config.ts"
+    "dev:ui": "vite --config src/ui/vite.config.ts",
+    "tauri": "tauri",
+    "build:tauri": "tauri build",
+    "dev:tauri": "tauri dev"
   },
   "keywords": [
     "desktop-overlay",
@@ -24,6 +27,8 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/cli": "^2.2.7",
     "@types/node": "^22.13.0",
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
