@@ -45,14 +45,29 @@ export const lineProgress = derived(
   }
 );
 
-export function setTrack(track: TrackInfo, trackLyrics: LyricLine[]): void {
+let lastTrackKey: string | null = null;
+
+export function setTrack(
+  track: TrackInfo,
+  trackLyrics: LyricLine[],
+  currentTimeMs?: number,
+  isPlaying?: boolean
+): void {
+  const currentKey = `${track.artist} - ${track.title}`;
+  const isDifferentTrack = lastTrackKey !== currentKey;
+  lastTrackKey = currentKey;
+
   currentTrack.set(track);
   lyrics.set(trackLyrics);
-  playbackState.set({
-    currentTimeMs: 0,
-    isPlaying: true,
-  });
+  playbackState.update((s) => ({
+    isPlaying: isPlaying !== undefined ? isPlaying : (isDifferentTrack ? true : s.isPlaying),
+    currentTimeMs:
+      currentTimeMs !== undefined
+        ? currentTimeMs
+        : (isDifferentTrack ? 0 : s.currentTimeMs),
+  }));
 }
+
 
 export function updateProgress(currentTimeMs: number): void {
   playbackState.update((s) => ({

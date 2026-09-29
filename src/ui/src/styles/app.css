@@ -2,6 +2,8 @@
 
 @layer base {
   html, body {
+    width: 100%;
+    height: 100%;
     margin: 0;
     padding: 0;
     background: transparent !important;
@@ -11,7 +13,12 @@
     color: #ffffff;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
+  #app {
+    width: 100%;
+    height: 100%;
+  }
 }
+
 
 /* Custom glassmorphism utilities */
 .glass-panel {

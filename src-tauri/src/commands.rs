@@ -28,9 +28,11 @@ pub struct NativeSpotifyStatus {
     pub title: String,
     pub artist: String,
     pub album: String,
+    pub album_art_url: Option<String>,
     pub duration_ms: u64,
     pub position_ms: u64,
 }
+
 
 #[tauri::command]
 pub fn set_click_through(window: WebviewWindow, passthrough: bool) -> Result<(), String> {
@@ -133,7 +135,7 @@ pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
             "spotify",
             "metadata",
             "--format",
-            "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}",
+            "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}:::{{mpris:artUrl}}",
         ])
         .output();
 
@@ -153,12 +155,18 @@ pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
 
     let length_us: u64 = parts[3].parse().unwrap_or(0);
     let position_us: u64 = parts[4].parse().unwrap_or(0);
+    let album_art_url = if parts.len() >= 6 && !parts[5].is_empty() {
+        Some(parts[5].to_string())
+    } else {
+        None
+    };
 
     Ok(Some(NativeSpotifyStatus {
         status: status_str,
         title,
         artist,
         album,
+        album_art_url,
         duration_ms: length_us / 1000,
         position_ms: position_us / 1000,
     }))
@@ -195,4 +203,63 @@ pub fn update_native_tray_menu(
     }
     Ok(())
 }
+
+#[tauri::command]
+pub fn log_from_js(level: String, msg: String) {
+    eprintln!("[JS {}] {}", level, msg);
+}
+
+#[tauri::command]
+pub fn fetch_lyrics_lrclib(
+    track_name: String,
+    artist_name: String,
+    album_name: Option<String>,
+    duration_secs: Option<u64>,
+) -> Result<Option<String>, String> {
+    // 1. Try exact query
+    let mut cmd = Command::new("curl");
+    cmd.args(["-s", "--max-time", "5", "-G", "https://lrclib.net/api/get"]);
+    cmd.args(["--data-urlencode", &format!("track_name={}", track_name)]);
+    cmd.args(["--data-urlencode", &format!("artist_name={}", artist_name)]);
+
+    if let Some(album) = album_name {
+        if !album.is_empty() {
+            cmd.args(["--data-urlencode", &format!("album_name={}", album)]);
+        }
+    }
+
+    if let Some(dur) = duration_secs {
+        if dur > 0 {
+            cmd.args(["--data-urlencode", &format!("duration={}", dur)]);
+        }
+    }
+
+    if let Ok(output) = cmd.output() {
+        if output.status.success() {
+            let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if text.starts_with('{') && !text.contains("\"error\":") {
+                return Ok(Some(text));
+            }
+        }
+    }
+
+    // 2. Fallback: query without album and duration
+    let mut fallback_cmd = Command::new("curl");
+    fallback_cmd.args(["-s", "--max-time", "5", "-G", "https://lrclib.net/api/get"]);
+    fallback_cmd.args(["--data-urlencode", &format!("track_name={}", track_name)]);
+    fallback_cmd.args(["--data-urlencode", &format!("artist_name={}", artist_name)]);
+
+    if let Ok(fb_output) = fallback_cmd.output() {
+        if fb_output.status.success() {
+            let text = String::from_utf8_lossy(&fb_output.stdout).trim().to_string();
+            if text.starts_with('{') && !text.contains("\"error\":") {
+                return Ok(Some(text));
+            }
+        }
+    }
+
+    Ok(None)
+}
+
+
 

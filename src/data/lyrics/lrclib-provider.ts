@@ -22,35 +22,65 @@ export class LrclibProvider implements LyricsProvider {
     }
 
     try {
-      const url = new URL(`${this.baseUrl}/get`);
-      url.searchParams.set('track_name', track.title);
-      url.searchParams.set('artist_name', track.artist);
+      let data: LrclibResponse | null = null;
 
-      if (track.album) {
-        url.searchParams.set('album_name', track.album);
+      // In Tauri runtime, delegate to native Rust command (bypasses browser CORS & sandbox)
+      if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+        try {
+          const { invoke } = await import('@tauri-apps/api/core');
+          const raw = await invoke<string | null>('fetch_lyrics_lrclib', {
+            trackName: track.title,
+            artistName: track.artist,
+            albumName: track.album || undefined,
+            durationSecs: track.durationMs > 0 ? Math.round(track.durationMs / 1000) : undefined,
+          });
+          if (raw) {
+            data = JSON.parse(raw) as LrclibResponse;
+          }
+        } catch (e) {
+          console.warn('[LrclibProvider] Tauri fetch_lyrics_lrclib error:', e);
+        }
       }
 
-      if (track.durationMs > 0) {
-        url.searchParams.set('duration', Math.round(track.durationMs / 1000).toString());
+      // Fallback to standard fetch
+      if (!data) {
+        const url = new URL(`${this.baseUrl}/get`);
+        url.searchParams.set('track_name', track.title);
+        url.searchParams.set('artist_name', track.artist);
+
+        if (track.album) {
+          url.searchParams.set('album_name', track.album);
+        }
+
+        if (track.durationMs > 0) {
+          url.searchParams.set('duration', Math.round(track.durationMs / 1000).toString());
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+        const headers: Record<string, string> = {
+          'X-User-Agent': 'SpotifyDesktopOverlay/1.0',
+        };
+        if (typeof window === 'undefined') {
+          headers['User-Agent'] = 'SpotifyDesktopOverlay/1.0 (https://github.com/desktop-overlay)';
+        }
+
+        const response = await fetch(url.toString(), {
+          signal: controller.signal,
+          headers,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          data = (await response.json()) as LrclibResponse;
+        }
       }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-      const response = await fetch(url.toString(), {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'SpotifyDesktopOverlay/1.0 (https://github.com/desktop-overlay)',
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
+      if (!data) {
         return null;
       }
-
-      const data = (await response.json()) as LrclibResponse;
 
       if (data.syncedLyrics) {
         const lines = parseLrc(data.syncedLyrics);
@@ -76,8 +106,10 @@ export class LrclibProvider implements LyricsProvider {
       }
 
       return null;
-    } catch {
+    } catch (err) {
+      console.warn('[LrclibProvider] Exception in fetchLyrics:', err);
       return null;
     }
   }
+
 }

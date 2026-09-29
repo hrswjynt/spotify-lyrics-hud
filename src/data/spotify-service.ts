@@ -49,14 +49,28 @@ export class SpotifyService {
     // 1. Handle track change
     const unsubTrack = this.mprisClient.onTrackChanged(async (track) => {
       this.currentTrack = track;
+      this.currentLyrics = [];
       this.clock.sync(0, this.currentStatus === 'Playing', track.durationMs);
+
+      // Immediately notify listeners of the new track (even before lyrics are fetched)
+      for (const l of this.trackListeners) {
+        l(track, []);
+      }
 
       // Fetch synchronized lyrics
       const lyricsResult = await this.lyricsProvider.fetchLyrics(track);
-      this.currentLyrics = lyricsResult ? lyricsResult.lines : [];
+      
+      // Ensure user hasn't skipped to another track while waiting for lyrics
+      const isSameTrack =
+        this.currentTrack &&
+        (this.currentTrack.id === track.id ||
+          (this.currentTrack.artist === track.artist && this.currentTrack.title === track.title));
 
-      for (const l of this.trackListeners) {
-        l(track, this.currentLyrics);
+      if (isSameTrack) {
+        this.currentLyrics = lyricsResult ? lyricsResult.lines : [];
+        for (const l of this.trackListeners) {
+          l(track, this.currentLyrics);
+        }
       }
     });
     this.unsubs.push(unsubTrack);
@@ -98,6 +112,9 @@ export class SpotifyService {
 
   public onTrack(callback: TrackCallback): () => void {
     this.trackListeners.push(callback);
+    if (this.currentTrack) {
+      callback(this.currentTrack, this.currentLyrics);
+    }
     return () => {
       this.trackListeners = this.trackListeners.filter((l) => l !== callback);
     };
@@ -105,6 +122,7 @@ export class SpotifyService {
 
   public onProgress(callback: ProgressCallback): () => void {
     this.progressListeners.push(callback);
+    callback(this.clock.getCurrentPositionMs(), this.clock.getIsPlaying());
     return () => {
       this.progressListeners = this.progressListeners.filter((l) => l !== callback);
     };
@@ -112,6 +130,9 @@ export class SpotifyService {
 
   public onStatus(callback: StatusCallback): () => void {
     this.statusListeners.push(callback);
+    if (this.currentStatus) {
+      callback(this.currentStatus);
+    }
     return () => {
       this.statusListeners = this.statusListeners.filter((l) => l !== callback);
     };

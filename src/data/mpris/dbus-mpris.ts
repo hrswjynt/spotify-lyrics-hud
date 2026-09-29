@@ -1,8 +1,21 @@
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import * as childProcess from 'child_process';
+import * as util from 'util';
 import { PlaybackStatus, PlaybackUpdate, SpotifyTrack } from '../types.js';
 
-const execFileAsync = promisify(execFile);
+let execFileAsync: ((cmd: string, args: string[]) => Promise<{ stdout: string; stderr: string }>) | null = null;
+try {
+  if (
+    typeof window === 'undefined' &&
+    util &&
+    typeof util.promisify === 'function' &&
+    childProcess &&
+    typeof childProcess.execFile === 'function'
+  ) {
+    execFileAsync = util.promisify(childProcess.execFile);
+  }
+} catch {
+  execFileAsync = null;
+}
 
 export interface MprisCommandRunner {
   isAvailable?(): Promise<boolean>;
@@ -25,6 +38,7 @@ export class PlayerctlRunner implements MprisCommandRunner {
   }
 
   public async isAvailable(): Promise<boolean> {
+    if (!execFileAsync) return false;
     try {
       const { stdout } = await execFileAsync('playerctl', ['-l']);
       return stdout.toLowerCase().includes(this.playerName.toLowerCase());
@@ -34,6 +48,7 @@ export class PlayerctlRunner implements MprisCommandRunner {
   }
 
   public async getStatus(): Promise<PlaybackStatus> {
+    if (!execFileAsync) return 'Stopped';
     try {
       const { stdout } = await execFileAsync('playerctl', ['-p', this.playerName, 'status']);
       const trimmed = stdout.trim();
@@ -47,6 +62,7 @@ export class PlayerctlRunner implements MprisCommandRunner {
   }
 
   public async getMetadata(): Promise<SpotifyTrack | null> {
+    if (!execFileAsync) return null;
     try {
       // Format: title:::artist:::album:::length:::artUrl:::trackid
       const format = '{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{mpris:artUrl}}:::{{mpris:trackid}}';
@@ -75,6 +91,7 @@ export class PlayerctlRunner implements MprisCommandRunner {
   }
 
   public async getPositionMs(): Promise<number> {
+    if (!execFileAsync) return 0;
     try {
       const { stdout } = await execFileAsync('playerctl', ['-p', this.playerName, 'position']);
       const seconds = parseFloat(stdout.trim());
@@ -86,23 +103,27 @@ export class PlayerctlRunner implements MprisCommandRunner {
   }
 
   public async playPause(): Promise<void> {
+    if (!execFileAsync) return;
     try {
       await execFileAsync('playerctl', ['-p', this.playerName, 'play-pause']);
     } catch {}
   }
 
   public async next(): Promise<void> {
+    if (!execFileAsync) return;
     try {
       await execFileAsync('playerctl', ['-p', this.playerName, 'next']);
     } catch {}
   }
 
   public async previous(): Promise<void> {
+    if (!execFileAsync) return;
     try {
       await execFileAsync('playerctl', ['-p', this.playerName, 'previous']);
     } catch {}
   }
 }
+
 
 /**
  * High-level Linux DBus MPRIS Client managing state polling, change detection, and events.

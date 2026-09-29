@@ -40,12 +40,15 @@ export class TauriMprisRunner implements MprisCommandRunner {
     const res: any = await inv('query_spotify_mpris');
     if (!res) return null;
     return {
+      id: `${res.artist} - ${res.title}`,
       title: res.title,
       artist: res.artist,
       album: res.album,
+      albumArtUrl: res.albumArtUrl,
       durationMs: res.durationMs,
     };
   }
+
 
   public async getPositionMs(): Promise<number> {
     const inv = await this.getInvoke();

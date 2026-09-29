@@ -85,4 +85,44 @@ describe('SpotifyService Orchestrator', () => {
 
     service.dispose();
   });
+
+  it('immediately emits current track and status to late subscribers', async () => {
+    const mockRunner: MprisCommandRunner = {
+      getStatus: vi.fn(async () => 'Playing'),
+      getMetadata: vi.fn(async () => sampleTrack),
+      getPositionMs: vi.fn(async () => 1000),
+      playPause: vi.fn(async () => {}),
+      next: vi.fn(async () => {}),
+      previous: vi.fn(async () => {}),
+    };
+
+    const mockLyricsProvider: LyricsProvider = {
+      name: 'mock',
+      fetchLyrics: vi.fn(async () => sampleLyricsResult),
+    };
+
+    const mprisClient = new DbusMprisClient(mockRunner);
+    const service = new SpotifyService({
+      mprisClient,
+      lyricsProvider: mockLyricsProvider,
+      autoStartPolling: false,
+    });
+
+    // Poll first before attaching listeners (simulating autoStart race condition)
+    await service.pollOnce();
+
+    // Now attach listeners late
+    const lateTrackListener = vi.fn();
+    const lateStatusListener = vi.fn();
+
+    service.onTrack(lateTrackListener);
+    service.onStatus(lateStatusListener);
+
+    // Both should have received current state immediately
+    expect(lateTrackListener).toHaveBeenCalledWith(sampleTrack, sampleLyricsResult.lines);
+    expect(lateStatusListener).toHaveBeenCalledWith('Playing');
+
+    service.dispose();
+  });
 });
+

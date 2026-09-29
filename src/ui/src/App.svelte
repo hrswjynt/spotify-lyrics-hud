@@ -90,8 +90,10 @@
   });
 </script>
 
-<main class="w-screen h-screen flex items-center justify-center p-3 bg-transparent">
-  <div class="w-full max-w-2xl h-80">
+<main class="w-full h-full flex flex-col p-2 bg-transparent overflow-hidden box-border">
+  <div class="w-full h-full flex flex-col min-h-0">
     <LyricsHUD />
   </div>
 </main>
+
+

@@ -31,3 +31,5 @@
 | TASK-29 | Tauri: Rust Native Tray & Global Shortcut Integration | Completed | TASK-28 |
 | TASK-30 | Tauri: TypeScript Tauri Platform Adapter & Tests | Completed | TASK-29 |
 | TASK-31 | Tauri: Full Integration & Compilation Verification | Completed | TASK-30 |
+| TASK-32 | Fix missing lyrics in HUD (subscriber replay, metadata fields, lifecycle order) & verify live | Completed | TASK-31 |
+

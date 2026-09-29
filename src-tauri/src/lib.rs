@@ -28,8 +28,12 @@ pub fn run() {
             commands::get_native_monitors,
             commands::query_spotify_mpris,
             commands::control_spotify_mpris,
-            commands::update_native_tray_menu
+            commands::update_native_tray_menu,
+            commands::log_from_js,
+            commands::fetch_lyrics_lrclib
         ])
+
+
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

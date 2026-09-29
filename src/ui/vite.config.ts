@@ -5,7 +5,9 @@ import * as path from 'path';
 
 export default defineConfig({
   root: import.meta.dirname,
+  base: './',
   plugins: [
+
     svelte(),
     tailwindcss(),
   ],

@@ -7,7 +7,8 @@
     : 0;
 </script>
 
-<div class="flex flex-col gap-2 w-full pb-3 border-b border-white/10 select-none">
+<div class="flex flex-col gap-2 w-full pb-3 border-b border-white/10 select-none shrink-0">
+
   <div class="flex items-center justify-between gap-3">
     <!-- Album art and track info -->
     <div class="flex items-center gap-3 overflow-hidden">

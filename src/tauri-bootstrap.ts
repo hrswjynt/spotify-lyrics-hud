@@ -29,18 +29,64 @@ export async function initTauriRuntime(): Promise<{
     capabilities: platform.getCapabilities(),
     platformName: 'linux',
     backendName: 'tauri',
+    initialIntent: {
+      visible: true,
+      placement: {
+        anchor: 'bottom-center',
+        offset: { x: 0, y: -48 },
+        size: { width: 750, height: 220 },
+        relativeTo: 'workArea',
+      },
+      zOrder: 'overlay',
+      interaction: {
+        pointer: 'passthrough',
+        keyboard: 'none',
+      },
+      display: { type: 'primary' },
+      fullscreenBehavior: 'hide-on-exclusive-fullscreen',
+      opacity: 0.95,
+
+    },
   });
 
   await engine.start();
+  void invoke('log_from_js', { level: 'INFO', msg: 'OverlayEngine started with size 750x220' });
 
   const mprisRunner = new TauriMprisRunner(invoke);
   const mprisClient = new DbusMprisClient(mprisRunner);
 
+
   const spotify = new SpotifyService({
     mprisClient,
-    autoStartPolling: true,
+    autoStartPolling: false,
     pollIntervalMs: 1000,
   });
+
+  // Sync Spotify changes to UI stores
+  spotify.onTrack((track, lyrics) => {
+    void invoke('log_from_js', {
+      level: 'INFO',
+      msg: `Track: "${track.title}" by "${track.artist}" | Lyrics: ${lyrics.length} lines | Art: ${track.albumArtUrl ? 'Yes' : 'No'}`,
+    });
+    setTrack(
+      {
+        title: track.title,
+        artist: track.artist,
+        album: track.album,
+        albumArtUrl: track.albumArtUrl,
+        durationMs: track.durationMs,
+      },
+      lyrics.map((l) => ({ timeMs: l.timeMs, text: l.text })),
+      spotify.getCurrentPositionMs(),
+      spotify.getIsPlaying()
+    );
+  });
+
+  spotify.onStatus((status) => {
+    void invoke('log_from_js', { level: 'INFO', msg: `Playback Status: ${status}` });
+    setPlaying(status === 'Playing');
+  });
+
 
   const controller = new SystemController({
     engine,
@@ -50,23 +96,14 @@ export async function initTauriRuntime(): Promise<{
 
   await controller.start();
 
-  // Sync Spotify changes to UI stores
-  spotify.onTrack((track, lyrics) => {
-    setTrack(
-      {
-        title: track.title,
-        artist: track.artist,
-        album: track.album,
-        albumArtUrl: track.albumArtUrl,
-        durationMs: track.durationMs,
-      },
-      lyrics.map((l) => ({ timeMs: l.timeMs, text: l.text }))
-    );
-  });
+  // Start polling MPRIS
+  spotify.start(1000);
+  try {
+    await spotify.pollOnce();
+  } catch (err) {
+    console.warn('[Spotify] Initial poll error:', err);
+  }
 
-  spotify.onStatus((status) => {
-    setPlaying(status === 'Playing');
-  });
 
   // Sync UI intent requests back to OverlayEngine
   onUIIntentChange((intent) => {
