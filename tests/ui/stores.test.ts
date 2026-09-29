@@ -65,4 +65,22 @@ describe('Reactive Playback and Overlay Stores', () => {
     toggleClickThrough();
     expect(get(overlayBridge).inputMode).toBe('passthrough');
   });
+
+  it('manages karaokeMode store and toggles state', async () => {
+    const { karaokeMode, toggleKaraokeMode, setKaraokeMode } = await import(
+      '../../src/ui/src/stores/playback.js'
+    );
+
+    setKaraokeMode(true);
+    expect(get(karaokeMode)).toBe(true);
+
+    const next1 = toggleKaraokeMode();
+    expect(next1).toBe(false);
+    expect(get(karaokeMode)).toBe(false);
+
+    const next2 = toggleKaraokeMode();
+    expect(next2).toBe(true);
+    expect(get(karaokeMode)).toBe(true);
+  });
 });
+

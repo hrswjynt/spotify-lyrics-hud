@@ -90,3 +90,39 @@ export function setPlaying(isPlaying: boolean): void {
   }));
 }
 
+function getInitialKaraokeMode(): boolean {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = localStorage.getItem('overlay_karaoke_mode');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+  }
+  return true;
+}
+
+export const karaokeMode = writable<boolean>(getInitialKaraokeMode());
+
+export function setKaraokeMode(enabled: boolean): void {
+  karaokeMode.set(enabled);
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      localStorage.setItem('overlay_karaoke_mode', String(enabled));
+    } catch {}
+  }
+}
+
+export function toggleKaraokeMode(): boolean {
+  let next = true;
+  karaokeMode.update((curr) => {
+    next = !curr;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.setItem('overlay_karaoke_mode', String(next));
+      } catch {}
+    }
+    return next;
+  });
+  return next;
+}
+
+
