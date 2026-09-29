@@ -15,3 +15,9 @@
 | TASK-13 | UI: Svelte UI Components (LyricsLine, Scroller, TrackHeader, StatusBadge, HUD) | Completed | TASK-12 |
 | TASK-14 | UI: App Entry Point, HTML Shell & Transparent Setup | Completed | TASK-13 |
 | TASK-15 | UI: End-to-End Verification & Build Check | Completed | TASK-14 |
+| TASK-16 | Data: Core Data Models & LRC Parser | Completed | TASK-15 |
+| TASK-17 | Data: LRCLIB Lyrics Provider | Completed | TASK-16 |
+| TASK-18 | Data: High-Precision Playback Clock | Completed | TASK-17 |
+| TASK-19 | Data: Linux DBus MPRIS Client | Completed | TASK-18 |
+| TASK-20 | Data: SpotifyService Orchestrator & UI Bridge | Completed | TASK-19 |
+| TASK-21 | Data: Full Verification & Live Demonstration | Completed | TASK-20 |
