@@ -8,7 +8,9 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc"
+    "build": "tsc",
+    "build:ui": "vite build --config src/ui/vite.config.ts",
+    "dev:ui": "vite --config src/ui/vite.config.ts"
   },
   "keywords": [
     "desktop-overlay",
@@ -20,8 +22,15 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.13.0",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.28",
+    "svelte": "^5.57.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.7.3",
+    "vite": "^8.3.1",
     "vitest": "^3.0.4"
   }
 }
