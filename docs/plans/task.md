@@ -9,3 +9,9 @@
 | TASK-07 | Step 8: Comprehensive Unit & Integration Tests (Positioning, Monitors, Fullscreen, Reconciliation) | Completed | TASK-04, TASK-05, TASK-06 |
 | TASK-08 | Step 9: Architecture Review, Static Analysis & Leakage Auditing | Completed | TASK-07 |
 | TASK-09 | Step 10: Complete System Documentation (windowing, multi-monitor, fullscreen, linux-wayland, windows) | Completed | TASK-08 |
+| TASK-10 | UI: Setup Svelte, Vite, and Tailwind CSS Dependencies & Config | Completed | TASK-09 |
+| TASK-11 | UI: Karaoke Timing & Synchronization Engine | Completed | TASK-10 |
+| TASK-12 | UI: Reactive State Stores & OverlayEngine Bridge | Completed | TASK-11 |
+| TASK-13 | UI: Svelte UI Components (LyricsLine, Scroller, TrackHeader, StatusBadge, HUD) | Completed | TASK-12 |
+| TASK-14 | UI: App Entry Point, HTML Shell & Transparent Setup | Completed | TASK-13 |
+| TASK-15 | UI: End-to-End Verification & Build Check | Completed | TASK-14 |

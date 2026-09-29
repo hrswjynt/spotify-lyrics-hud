@@ -1,0 +1,79 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import LyricsHUD from './components/LyricsHUD.svelte';
+  import { overlayBridge, toggleClickThrough } from './stores/overlay.js';
+  import {
+    playbackState,
+    setTrack,
+    updateProgress,
+  } from './stores/playback.js';
+
+  const SAMPLE_TRACK = {
+    title: 'Starboy (feat. Daft Punk)',
+    artist: 'The Weeknd, Daft Punk',
+    album: 'Starboy',
+    albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=120&auto=format&fit=crop&q=80',
+    durationMs: 45000,
+  };
+
+  const SAMPLE_LYRICS = [
+    { timeMs: 1500, text: "I'm tryna put you in the worst mood, ah" },
+    { timeMs: 4800, text: 'P1 cleaner than your church shoes, ah' },
+    { timeMs: 8200, text: 'Milli point two just to hurt you, ah' },
+    { timeMs: 11500, text: 'All red Lamb’ just to tease you, ah' },
+    { timeMs: 15000, text: 'None of these toys on lease too, ah' },
+    { timeMs: 18500, text: 'Made your whole year in a week too, yah' },
+    { timeMs: 22000, text: 'Main bitch out your league too, ah' },
+    { timeMs: 25500, text: 'Side bitch out of your league too, ah' },
+    { timeMs: 29000, text: "Look what you've done" },
+    { timeMs: 32500, text: "I'm a motherfuckin' starboy" },
+    { timeMs: 36500, text: "Look what you've done" },
+    { timeMs: 40000, text: "I'm a motherfuckin' starboy" },
+  ];
+
+  onMount(() => {
+    // 1. Initialize with sample synced song
+    setTrack(SAMPLE_TRACK, SAMPLE_LYRICS);
+
+    // 2. High-frequency requestAnimationFrame playback clock
+    let animationFrameId: number;
+    let lastTimestamp = performance.now();
+
+    const tick = (now: number) => {
+      const delta = now - lastTimestamp;
+      lastTimestamp = now;
+
+      if ($playbackState.isPlaying) {
+        let nextTime = $playbackState.currentTimeMs + delta;
+        if (nextTime > SAMPLE_TRACK.durationMs) {
+          nextTime = 0; // Loop song for continuous testing
+        }
+        updateProgress(nextTime);
+      }
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    animationFrameId = requestAnimationFrame(tick);
+
+    // 3. Global hotkey listener: Ctrl+Shift+X toggles click-through
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'X' || e.key === 'x')) {
+        toggleClickThrough();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  });
+</script>
+
+<main class="w-screen h-screen flex items-center justify-center p-3 bg-transparent">
+  <div class="w-full max-w-2xl h-80">
+    <LyricsHUD />
+  </div>
+</main>

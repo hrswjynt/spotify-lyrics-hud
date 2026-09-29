@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import * as path from 'path';
 
 export default defineConfig({
-  root: path.resolve(__dirname),
+  root: import.meta.dirname,
   plugins: [
     svelte(),
     tailwindcss(),
@@ -14,7 +14,7 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
-    outDir: path.resolve(__dirname, '../../dist-ui'),
+    outDir: path.resolve(import.meta.dirname, '../../dist-ui'),
     emptyOutDir: true,
     target: 'esnext',
   },
