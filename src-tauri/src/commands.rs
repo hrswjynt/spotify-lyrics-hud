@@ -182,3 +182,17 @@ pub fn control_spotify_mpris(action: String) -> Result<bool, String> {
 
     Ok(output.status.success())
 }
+
+#[tauri::command]
+pub fn update_native_tray_menu(
+    app: AppHandle,
+    items: Vec<crate::tray::TrayItemPayload>,
+) -> Result<(), String> {
+    if let Some(tray) = app.tray_by_id("main-tray") {
+        let menu = crate::tray::build_menu_from_items(&app, &items)
+            .map_err(|e| e.to_string())?;
+        tray.set_menu(Some(menu)).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
