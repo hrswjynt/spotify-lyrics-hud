@@ -67,3 +67,11 @@ export function togglePlayPause(): void {
     isPlaying: !s.isPlaying,
   }));
 }
+
+export function setPlaying(isPlaying: boolean): void {
+  playbackState.update((s) => ({
+    ...s,
+    isPlaying,
+  }));
+}
+

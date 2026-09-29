@@ -7,6 +7,7 @@
     setTrack,
     updateProgress,
   } from './stores/playback.js';
+  import { initTauriRuntime } from '../../tauri-bootstrap.js';
 
   const SAMPLE_TRACK = {
     title: 'Starboy (feat. Daft Punk)',
@@ -32,42 +33,59 @@
   ];
 
   onMount(() => {
-    // 1. Initialize with sample synced song
-    setTrack(SAMPLE_TRACK, SAMPLE_LYRICS);
+    let cleanupTauri: (() => void) | undefined;
 
-    // 2. High-frequency requestAnimationFrame playback clock
-    let animationFrameId: number;
-    let lastTimestamp = performance.now();
-
-    const tick = (now: number) => {
-      const delta = now - lastTimestamp;
-      lastTimestamp = now;
-
-      if ($playbackState.isPlaying) {
-        let nextTime = $playbackState.currentTimeMs + delta;
-        if (nextTime > SAMPLE_TRACK.durationMs) {
-          nextTime = 0; // Loop song for continuous testing
+    // Check if running in Tauri native runtime
+    if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+      void initTauriRuntime().then((runtime) => {
+        if (runtime) {
+          cleanupTauri = () => {
+            runtime.controller.dispose();
+            runtime.spotify.dispose();
+            runtime.engine.dispose();
+          };
         }
-        updateProgress(nextTime);
-      }
+      });
+    } else {
+      // Standalone browser / dev preview fallback
+      setTrack(SAMPLE_TRACK, SAMPLE_LYRICS);
+
+      let animationFrameId: number;
+      let lastTimestamp = performance.now();
+
+      const tick = (now: number) => {
+        const delta = now - lastTimestamp;
+        lastTimestamp = now;
+
+        if ($playbackState.isPlaying) {
+          let nextTime = $playbackState.currentTimeMs + delta;
+          if (nextTime > SAMPLE_TRACK.durationMs) {
+            nextTime = 0;
+          }
+          updateProgress(nextTime);
+        }
+
+        animationFrameId = requestAnimationFrame(tick);
+      };
 
       animationFrameId = requestAnimationFrame(tick);
-    };
 
-    animationFrameId = requestAnimationFrame(tick);
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'X' || e.key === 'x')) {
+          toggleClickThrough();
+        }
+      };
 
-    // 3. Global hotkey listener: Ctrl+Shift+X toggles click-through
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && (e.key === 'X' || e.key === 'x')) {
-        toggleClickThrough();
-      }
-    };
+      window.addEventListener('keydown', handleKeyDown);
 
-    window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('keydown', handleKeyDown);
+      cleanupTauri?.();
     };
   });
 </script>
