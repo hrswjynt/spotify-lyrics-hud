@@ -1,6 +1,46 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs
 dist/
 dist-ui/
-*.log
-.DS_Store
+build/
+*.tsbuildinfo
+
+# Rust & Tauri Build Artifacts
+target/
 src-tauri/target/
+*.pdb
+
+# Environment & Local Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & OS Metadata
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+
+# Temporary / Scratch files
+scratch/
+tmp/
+.cache/
