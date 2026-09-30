@@ -13,6 +13,7 @@
     HighlightThemeOption,
     InactiveOpacityOption,
     BackgroundStyleOption,
+    ScaleOption,
   } from '../stores/display-settings.js';
 
   export let isOpen: boolean = false;
@@ -141,8 +142,33 @@
         </div>
 
       {:else if activeTab === 'layout'}
-        <!-- Jumlah Baris -->
+        <!-- Skala Tampilan Keseluruhan (Scale) -->
         <div class="flex flex-col gap-1">
+          <span class="text-white/60 text-[11px] font-medium">Skala Tampilan (Scale):</span>
+          <div class="grid grid-cols-5 gap-1.5">
+            {#each [
+              { id: '0.5', label: '0.5x' },
+              { id: '0.75', label: '0.75x' },
+              { id: '1', label: '1.0x' },
+              { id: '1.25', label: '1.25x' },
+              { id: '1.5', label: '1.5x' }
+            ] as opt}
+              <button
+                type="button"
+                on:click={() => updateDisplaySettings({ scale: opt.id as ScaleOption })}
+                class="py-1 px-1 rounded-lg border text-center transition-all cursor-pointer font-medium text-[11px]
+                  {$displaySettings.scale === opt.id
+                    ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
+                    : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
+              >
+                {opt.label}
+              </button>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Jumlah Baris -->
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Mode Tampilan Baris:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
