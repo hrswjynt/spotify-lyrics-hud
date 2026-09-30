@@ -80,7 +80,11 @@
       : `font-medium ${inactiveOpacityClass} hover:opacity-90`}"
 >
   {#if !text || text.trim() === ''}
-    <p class="{isActive ? activeSizeClass : inactiveSizeClass} tracking-normal opacity-25 select-none inline-block">♪</p>
+    {#if isActive}
+      <p class="{activeSizeClass} tracking-normal opacity-30 select-none inline-block animate-pulse">♪</p>
+    {:else}
+      <p class="{inactiveSizeClass} tracking-normal opacity-0 select-none inline-block pointer-events-none">&nbsp;</p>
+    {/if}
   {:else if isActive}
     {#if $karaokeMode}
       <p

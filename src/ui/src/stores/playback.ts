@@ -47,6 +47,26 @@ export const lineProgress = derived(
 
 let lastTrackKey: string | null = null;
 
+/**
+ * Normalizes raw lyrics so that if the first line is not empty,
+ * an empty intro line is prepended at timeMs = 0.
+ * This guarantees that when the first lyric is highlighted,
+ * it is displayed in the center of the 3-line HUD with an empty line above it.
+ */
+export function normalizeLyrics(rawLyrics: LyricLine[]): LyricLine[] {
+  if (!rawLyrics || rawLyrics.length === 0) {
+    return [];
+  }
+
+  // If the first line is already empty (whitespace only or empty), keep as-is
+  if (rawLyrics[0].text.trim() === '') {
+    return rawLyrics;
+  }
+
+  // Prepend an empty intro line at timeMs = 0
+  return [{ timeMs: 0, text: '' }, ...rawLyrics];
+}
+
 export function setTrack(
   track: TrackInfo,
   trackLyrics: LyricLine[],
@@ -58,7 +78,7 @@ export function setTrack(
   lastTrackKey = currentKey;
 
   currentTrack.set(track);
-  lyrics.set(trackLyrics);
+  lyrics.set(normalizeLyrics(trackLyrics));
   playbackState.update((s) => ({
     isPlaying: isPlaying !== undefined ? isPlaying : (isDifferentTrack ? true : s.isPlaying),
     currentTimeMs:

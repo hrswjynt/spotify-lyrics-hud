@@ -8,6 +8,7 @@ import {
   playbackState,
   setTrack,
   updateProgress,
+  normalizeLyrics,
 } from '../../src/ui/src/stores/playback.js';
 import {
   overlayBridge,
@@ -31,29 +32,54 @@ describe('Reactive Playback and Overlay Stores', () => {
     );
   });
 
-  it('updates currentTrack and lyrics stores via setTrack', () => {
+  it('updates currentTrack and lyrics stores via setTrack, adding intro empty line', () => {
     expect(get(currentTrack)?.title).toBe('Starboy');
-    expect(get(lyrics)).toHaveLength(3);
+    // Original 3 lines + 1 prepended intro empty line = 4 lines
+    const parsedLyrics = get(lyrics);
+    expect(parsedLyrics).toHaveLength(4);
+    expect(parsedLyrics[0]).toEqual({ timeMs: 0, text: '' });
+    expect(parsedLyrics[1].text).toBe("I'm tryna put you in the worst mood, ah");
   });
 
   it('calculates active line reactively when progress updates', () => {
-    updateProgress(500); // Before first line
-    expect(get(activeLineIndex)).toBe(-1);
-
-    updateProgress(2500); // Between 1000 and 4000 -> line 0
+    updateProgress(500); // During intro empty line (0ms to 1000ms)
     expect(get(activeLineIndex)).toBe(0);
 
-    updateProgress(5000); // Between 4000 and 8000 -> line 1
+    updateProgress(2500); // First lyric line (1000ms to 4000ms) -> line 1
     expect(get(activeLineIndex)).toBe(1);
 
-    updateProgress(10000); // Past 8000 -> line 2
+    updateProgress(5000); // Second lyric line (4000ms to 8000ms) -> line 2
     expect(get(activeLineIndex)).toBe(2);
+
+    updateProgress(10000); // Past 8000ms -> line 3
+    expect(get(activeLineIndex)).toBe(3);
   });
 
   it('calculates active line progress percentage reactively', () => {
-    // Line 0 is 1000ms to 4000ms. At 2500ms, progress should be 50%
+    // Line 1 is 1000ms to 4000ms. At 2500ms, progress should be 50%
     updateProgress(2500);
     expect(get(lineProgress)).toBeCloseTo(0.5);
+  });
+
+  it('normalizes lyrics by prepending empty line only if not present', () => {
+    // Case 1: First line is non-empty -> prepends { timeMs: 0, text: '' }
+    const res1 = normalizeLyrics([
+      { timeMs: 3000, text: 'First sung lyric' }
+    ]);
+    expect(res1).toHaveLength(2);
+    expect(res1[0]).toEqual({ timeMs: 0, text: '' });
+    expect(res1[1].text).toBe('First sung lyric');
+
+    // Case 2: First line is already empty -> keeps as-is without duplicating
+    const res2 = normalizeLyrics([
+      { timeMs: 0, text: '' },
+      { timeMs: 3000, text: 'First sung lyric' }
+    ]);
+    expect(res2).toHaveLength(2);
+    expect(res2[0]).toEqual({ timeMs: 0, text: '' });
+
+    // Case 3: Empty array -> returns empty array
+    expect(normalizeLyrics([])).toEqual([]);
   });
 
   it('toggles click-through mode between passthrough and interactive', () => {
