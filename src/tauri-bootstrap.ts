@@ -24,6 +24,15 @@ export async function initTauriRuntime(): Promise<{
   const platform = new TauriPlatformAdapter({ invoke });
   const windowHandle = await platform.createOverlayWindow();
 
+  let initialScale = 1.0;
+  const unsubInitialScale = displaySettings.subscribe((s) => {
+    initialScale = parseFloat(s.scale || '1') || 1.0;
+  });
+  unsubInitialScale();
+
+  const initWidth = Math.round(750 * initialScale);
+  const initHeight = Math.round(275 * initialScale);
+
   const engine = new OverlayEngine({
     window: windowHandle,
     displayProvider: platform.getDisplayProvider(),
@@ -36,7 +45,7 @@ export async function initTauriRuntime(): Promise<{
       placement: {
         anchor: 'bottom-center',
         offset: { x: 0, y: -48 },
-        size: { width: 750, height: 275 },
+        size: { width: initWidth, height: initHeight },
         relativeTo: 'workArea',
       },
       zOrder: 'overlay',
@@ -47,12 +56,11 @@ export async function initTauriRuntime(): Promise<{
       display: { type: 'primary' },
       fullscreenBehavior: 'hide-on-exclusive-fullscreen',
       opacity: 0.95,
-
     },
   });
 
   await engine.start();
-  void invoke('log_from_js', { level: 'INFO', msg: 'OverlayEngine started with size 750x275' });
+  void invoke('log_from_js', { level: 'INFO', msg: `OverlayEngine started with size ${initWidth}x${initHeight}` });
 
   const mprisRunner = new TauriMprisRunner(invoke);
   const mprisClient = new DbusMprisClient(mprisRunner);
@@ -138,6 +146,7 @@ export async function initTauriRuntime(): Promise<{
     }
   });
 
+  let lastScale: string | undefined = undefined;
   displaySettings.subscribe((s) => {
     const current = controller.getDisplaySettings();
     if (
@@ -150,6 +159,28 @@ export async function initTauriRuntime(): Promise<{
         lineMode: s.lineMode,
         highlightTheme: s.highlightTheme,
       });
+    }
+
+    if (s.scale && s.scale !== lastScale) {
+      const isInitial = lastScale === undefined;
+      lastScale = s.scale;
+      if (!isInitial) {
+        const factor = parseFloat(s.scale) || 1.0;
+        const targetWidth = Math.round(750 * factor);
+        const targetHeight = Math.round(275 * factor);
+        const currentIntent = engine.getIntent();
+        void engine.setIntent({
+          ...currentIntent,
+          placement: {
+            ...currentIntent.placement,
+            size: { width: targetWidth, height: targetHeight },
+          },
+        });
+        void invoke('log_from_js', {
+          level: 'INFO',
+          msg: `Overlay scaled to ${s.scale}x (${targetWidth}x${targetHeight})`,
+        });
+      }
     }
   });
 

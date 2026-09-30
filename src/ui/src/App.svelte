@@ -2,12 +2,15 @@
   import { onMount } from 'svelte';
   import LyricsHUD from './components/LyricsHUD.svelte';
   import { overlayBridge, toggleClickThrough } from './stores/overlay.js';
+  import { displaySettings } from './stores/display-settings.js';
   import {
     playbackState,
     setTrack,
     updateProgress,
   } from './stores/playback.js';
   import { initTauriRuntime } from '../../tauri-bootstrap.js';
+
+  $: scaleFactor = parseFloat($displaySettings.scale || '1') || 1.0;
 
   const SAMPLE_TRACK = {
     title: 'Starboy (feat. Daft Punk)',
@@ -90,7 +93,10 @@
   });
 </script>
 
-<main class="w-full h-full flex flex-col p-2 bg-transparent overflow-hidden box-border">
+<main
+  class="w-full h-full flex flex-col p-2 bg-transparent overflow-hidden box-border"
+  style="zoom: {scaleFactor};"
+>
   <div class="w-full h-full flex flex-col min-h-0">
     <LyricsHUD />
   </div>
