@@ -1,7 +1,7 @@
 {
-  "name": "desktop-overlay",
+  "name": "spotify-lyrics-hud",
   "version": "1.0.0",
-  "description": "Cross-Platform Native Desktop Overlay Architecture and Implementation",
+  "description": "A sleek, lightweight desktop karaoke lyrics HUD for Spotify built with Tauri v2, Svelte & Rust.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
