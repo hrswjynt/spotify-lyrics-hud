@@ -2,7 +2,7 @@ import { OverlayEngine } from '../core/overlay-engine.js';
 import { Anchor, Display, DisplayProvider } from '../core/types.js';
 import { SpotifyService } from '../data/spotify-service.js';
 import { HotkeyManager } from './hotkeys/hotkey-manager.js';
-import { buildTrayMenu } from './tray/menu-items.js';
+import { buildTrayMenu, TrayDisplaySettings } from './tray/menu-items.js';
 import { TrayManager } from './tray/tray-manager.js';
 
 export interface SystemControllerOptions {
@@ -13,6 +13,8 @@ export interface SystemControllerOptions {
   trayManager?: TrayManager;
   karaokeMode?: boolean;
   onToggleKaraoke?: (enabled: boolean) => void;
+  displaySettings?: TrayDisplaySettings;
+  onUpdateDisplaySettings?: (settings: Partial<TrayDisplaySettings>) => void;
 }
 
 export class SystemController {
@@ -23,6 +25,12 @@ export class SystemController {
   private trayManager: TrayManager;
   private karaokeMode: boolean = true;
   private onToggleKaraokeCallback?: (enabled: boolean) => void;
+  private displaySettings: TrayDisplaySettings = {
+    alignment: 'center',
+    lineMode: 'triple',
+    highlightTheme: 'emerald',
+  };
+  private onUpdateDisplaySettingsCallback?: (settings: Partial<TrayDisplaySettings>) => void;
 
   private displays: Display[] = [];
   private unsubs: Array<() => void> = [];
@@ -35,6 +43,10 @@ export class SystemController {
     this.trayManager = options.trayManager || new TrayManager();
     this.karaokeMode = options.karaokeMode ?? true;
     this.onToggleKaraokeCallback = options.onToggleKaraoke;
+    if (options.displaySettings) {
+      this.displaySettings = { ...this.displaySettings, ...options.displaySettings };
+    }
+    this.onUpdateDisplaySettingsCallback = options.onUpdateDisplaySettings;
 
     this.hotkeyManager.registerDefaultBindings();
     this.setupHotkeyHandlers();
@@ -204,6 +216,16 @@ export class SystemController {
     return this.karaokeMode;
   }
 
+  public getDisplaySettings(): TrayDisplaySettings {
+    return { ...this.displaySettings };
+  }
+
+  public async setDisplaySettings(settings: Partial<TrayDisplaySettings>): Promise<void> {
+    this.displaySettings = { ...this.displaySettings, ...settings };
+    this.onUpdateDisplaySettingsCallback?.(settings);
+    await this.refreshTrayMenu();
+  }
+
   public async refreshTrayMenu(): Promise<void> {
     const intent = this.engine.getIntent();
     const resolved = this.engine.getLastResolvedState();
@@ -260,6 +282,7 @@ export class SystemController {
       visible: intent.visible,
       currentAnchor: intent.placement.anchor,
       karaokeMode: this.karaokeMode,
+      displaySettings: this.displaySettings,
       isPlaying: this.spotifyService ? this.spotifyService.getIsPlaying() : false,
       currentTrack: this.spotifyService ? this.spotifyService.getCurrentTrack() : null,
       callbacks: {
@@ -268,6 +291,9 @@ export class SystemController {
         onToggleKaraoke: () => void this.toggleKaraoke(),
         onSelectDisplay: (id) => void this.setDisplay(id),
         onSelectAnchor: (anchor) => void this.setAnchor(anchor),
+        onSelectAlignment: (alignment) => void this.setDisplaySettings({ alignment }),
+        onSelectLineMode: (lineMode) => void this.setDisplaySettings({ lineMode }),
+        onSelectTheme: (highlightTheme) => void this.setDisplaySettings({ highlightTheme }),
         onPlayPause: () => void this.playPause(),
         onNextTrack: () => void this.nextTrack(),
         onPrevTrack: () => void this.prevTrack(),

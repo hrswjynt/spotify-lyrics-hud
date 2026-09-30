@@ -27,12 +27,21 @@ describe('Dynamic Tray Menu Builder & TrayManager', () => {
     const onToggleClickThrough = vi.fn();
     const onSelectDisplay = vi.fn();
 
+    const onSelectAlignment = vi.fn();
+    const onSelectLineMode = vi.fn();
+    const onSelectTheme = vi.fn();
+
     const menu = buildTrayMenu({
       displays,
       currentDisplayId: 'HDMI-A-1',
       inputMode: 'passthrough',
       visible: true,
       currentAnchor: 'bottom-center',
+      displaySettings: {
+        alignment: 'center',
+        lineMode: 'triple',
+        highlightTheme: 'emerald',
+      },
       isPlaying: true,
       currentTrack: {
         title: 'Spotlight',
@@ -45,6 +54,9 @@ describe('Dynamic Tray Menu Builder & TrayManager', () => {
         onToggleVisibility: vi.fn(),
         onSelectDisplay,
         onSelectAnchor: vi.fn(),
+        onSelectAlignment,
+        onSelectLineMode,
+        onSelectTheme,
         onPlayPause: vi.fn(),
         onNextTrack: vi.fn(),
         onPrevTrack: vi.fn(),
@@ -80,6 +92,32 @@ describe('Dynamic Tray Menu Builder & TrayManager', () => {
     expect(karaokeItem).toBeDefined();
     expect(karaokeItem?.checked).toBe(true);
     expect(karaokeItem?.shortcut).toBe('Ctrl+Shift+K');
+
+    // 5. Check Display Settings submenu
+    const settingsSubmenu = menu.items.find((i) => i.id === 'display_settings_submenu');
+    expect(settingsSubmenu).toBeDefined();
+    expect(settingsSubmenu?.children?.length).toBe(3);
+
+    // Check Alignment child
+    const alignSub = settingsSubmenu?.children?.find((c) => c.id === 'alignment_submenu');
+    expect(alignSub?.children).toHaveLength(3);
+    const leftItem = alignSub?.children?.find((c) => c.id === 'align_left');
+    leftItem?.action?.();
+    expect(onSelectAlignment).toHaveBeenCalledWith('left');
+
+    // Check Line Mode child
+    const modeSub = settingsSubmenu?.children?.find((c) => c.id === 'line_mode_submenu');
+    expect(modeSub?.children).toHaveLength(3);
+    const scrollerItem = modeSub?.children?.find((c) => c.id === 'lines_scroller');
+    scrollerItem?.action?.();
+    expect(onSelectLineMode).toHaveBeenCalledWith('scroller');
+
+    // Check Theme child
+    const themeSub = settingsSubmenu?.children?.find((c) => c.id === 'theme_submenu');
+    expect(themeSub?.children).toHaveLength(4);
+    const cyanItem = themeSub?.children?.find((c) => c.id === 'theme_cyan');
+    cyanItem?.action?.();
+    expect(onSelectTheme).toHaveBeenCalledWith('cyan');
   });
 
   it('TrayManager manages menu state and event routing', () => {

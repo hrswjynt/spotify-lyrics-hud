@@ -1,10 +1,12 @@
 import { TauriPlatformAdapter } from './platform/tauri/index.js';
 import { OverlayEngine } from './core/overlay-engine.js';
 import { SystemController } from './system/system-controller.js';
+import { TrayDisplaySettings } from './system/tray/menu-items.js';
 import { SpotifyService } from './data/spotify-service.js';
 import { DbusMprisClient } from './data/mpris/dbus-mpris.js';
 import { TauriMprisRunner } from './data/mpris/tauri-mpris-runner.js';
-import { setTrack, setPlaying, updateProgress } from './ui/src/stores/playback.js';
+import { setTrack, setPlaying, updateProgress, karaokeMode, setKaraokeMode } from './ui/src/stores/playback.js';
+import { displaySettings, updateDisplaySettings } from './ui/src/stores/display-settings.js';
 import { onUIIntentChange, syncWithEngineState } from './ui/src/stores/overlay.js';
 
 export async function initTauriRuntime(): Promise<{
@@ -88,10 +90,67 @@ export async function initTauriRuntime(): Promise<{
   });
 
 
+  let initialKaraoke = true;
+  const unsubInitial = karaokeMode.subscribe((v) => {
+    initialKaraoke = v;
+  });
+  unsubInitial();
+
+  let initialDisplaySettings: TrayDisplaySettings = {};
+  const unsubInitialDisplay = displaySettings.subscribe((s) => {
+    initialDisplaySettings = {
+      alignment: s.alignment,
+      lineMode: s.lineMode,
+      highlightTheme: s.highlightTheme,
+    };
+  });
+  unsubInitialDisplay();
+
   const controller = new SystemController({
     engine,
     displayProvider: platform.getDisplayProvider(),
     spotifyService: spotify,
+    karaokeMode: initialKaraoke,
+    displaySettings: initialDisplaySettings,
+    onToggleKaraoke: (enabled) => {
+      setKaraokeMode(enabled);
+      void invoke('log_from_js', {
+        level: 'INFO',
+        msg: `Karaoke mode toggled from hotkey/tray to: ${enabled}`,
+      });
+    },
+    onUpdateDisplaySettings: (settings) => {
+      updateDisplaySettings(settings);
+      void invoke('log_from_js', {
+        level: 'INFO',
+        msg: `Display settings updated from tray: ${JSON.stringify(settings)}`,
+      });
+    },
+  });
+
+  karaokeMode.subscribe((enabled) => {
+    if (controller.isKaraokeMode() !== enabled) {
+      void controller.setKaraokeMode(enabled);
+      void invoke('log_from_js', {
+        level: 'INFO',
+        msg: `Karaoke mode synced from UI to: ${enabled}`,
+      });
+    }
+  });
+
+  displaySettings.subscribe((s) => {
+    const current = controller.getDisplaySettings();
+    if (
+      current.alignment !== s.alignment ||
+      current.lineMode !== s.lineMode ||
+      current.highlightTheme !== s.highlightTheme
+    ) {
+      void controller.setDisplaySettings({
+        alignment: s.alignment,
+        lineMode: s.lineMode,
+        highlightTheme: s.highlightTheme,
+      });
+    }
   });
 
   await controller.start();

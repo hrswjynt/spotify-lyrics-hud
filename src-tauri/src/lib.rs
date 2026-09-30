@@ -1,7 +1,7 @@
 pub mod commands;
 pub mod tray;
 
-use tauri_plugin_global_shortcut::ShortcutState;
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 use tauri::Emitter;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -18,6 +18,17 @@ pub fn run() {
         )
         .setup(|app| {
             let _tray = tray::create_tray(app.handle())?;
+            for sc_str in [
+                "Ctrl+Shift+X",
+                "Ctrl+Shift+H",
+                "Ctrl+Shift+M",
+                "Ctrl+Shift+Space",
+                "Ctrl+Shift+K",
+            ] {
+                if let Ok(sc) = sc_str.parse::<Shortcut>() {
+                    let _ = app.global_shortcut().register(sc);
+                }
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
