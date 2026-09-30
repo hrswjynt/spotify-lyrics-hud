@@ -16,7 +16,7 @@
         "label": "main",
         "width": 750,
         "height": 275,
-        "resizable": false,
+        "resizable": true,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
