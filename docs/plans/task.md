@@ -36,5 +36,6 @@
 | TASK-34 | Display Settings Panel (Typography, Alignment, Spacing, Dimming, Themes) & 3-Line Centered Layout | Completed | TASK-33 |
 | TASK-35 | Refine Left and Right Lyrics Alignment, Padding & Typography Hierarchy | Completed | TASK-34 |
 | TASK-36 | Auto-Prepend Intro Empty Line to Keep First Sung Lyric Centered | Completed | TASK-35 |
+| TASK-37 | Native Web Anchor Scrolling (scrollIntoView to #lyric-id with scroll-smooth) | Completed | TASK-36 |
 
 

@@ -72,7 +72,7 @@
 </script>
 
 <div
-  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-4 transition-all duration-300 ease-out select-none
+  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-4 transition-all duration-500 ease-out select-none
     {isActive
       ? 'font-bold'
       : isPast
