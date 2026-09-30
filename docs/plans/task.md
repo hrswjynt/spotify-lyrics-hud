@@ -37,5 +37,6 @@
 | TASK-35 | Refine Left and Right Lyrics Alignment, Padding & Typography Hierarchy | Completed | TASK-34 |
 | TASK-36 | Auto-Prepend Intro Empty Line to Keep First Sung Lyric Centered | Completed | TASK-35 |
 | TASK-37 | Native Web Anchor Scrolling (scrollIntoView to #lyric-id with scroll-smooth) | Completed | TASK-36 |
+| TASK-38 | Pure CSS GPU Hardware-Accelerated Smooth Translation (600ms cubic-bezier ease-out) | Completed | TASK-37 |
 
 
