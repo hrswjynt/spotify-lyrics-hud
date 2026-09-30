@@ -22,7 +22,7 @@
 </script>
 
 <div
-  class="relative flex flex-col w-full h-full min-h-0 {bgStyleClass} rounded-2xl p-4 gap-3 overflow-hidden select-none border"
+  class="relative flex flex-col w-full h-full min-h-0 {bgStyleClass} rounded-2xl p-3.5 gap-2 overflow-hidden select-none border"
   style="opacity: {$overlayBridge.opacity};"
 >
   <!-- Top track header -->

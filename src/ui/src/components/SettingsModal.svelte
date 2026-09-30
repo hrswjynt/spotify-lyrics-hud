@@ -23,7 +23,7 @@
 
 {#if isOpen}
   <div
-    class="absolute inset-0 z-50 bg-black/85 backdrop-blur-xl rounded-2xl flex flex-col p-4 text-white overflow-hidden animate-in fade-in zoom-in-95 duration-200 select-none border border-white/15 shadow-2xl"
+    class="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl rounded-2xl flex flex-col p-3 text-white overflow-hidden animate-in fade-in zoom-in-95 duration-200 select-none border border-white/15 shadow-2xl"
   >
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
@@ -68,10 +68,11 @@
     </div>
 
     <!-- Modal Content -->
-    <div class="flex-1 overflow-y-auto no-scrollbar py-2.5 flex flex-col gap-3 min-h-0 text-xs">
+    <!-- Modal Content -->
+    <div class="flex-1 overflow-y-auto no-scrollbar py-1 flex flex-col gap-1.5 min-h-0 text-xs">
       {#if activeTab === 'typography'}
         <!-- Ukuran Font -->
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1">
           <span class="text-white/60 text-[11px] font-medium">Ukuran Font Lirik Aktif:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -82,7 +83,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ fontSize: opt.id as FontSizeOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.fontSize === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -94,7 +95,7 @@
         </div>
 
         <!-- Jenis Font -->
-        <div class="flex flex-col gap-1.5 pt-1">
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Jenis Font:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -105,7 +106,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ fontFamily: opt.id as FontFamilyOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer {opt.style}
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer {opt.style}
                   {$displaySettings.fontFamily === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -117,7 +118,7 @@
         </div>
 
         <!-- Perataan / Alignment -->
-        <div class="flex flex-col gap-1.5 pt-1">
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Perataan Lirik:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -128,7 +129,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ alignment: opt.id as TextAlignmentOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.alignment === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -141,7 +142,7 @@
 
       {:else if activeTab === 'layout'}
         <!-- Jumlah Baris -->
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1">
           <span class="text-white/60 text-[11px] font-medium">Mode Tampilan Baris:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -152,7 +153,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ lineMode: opt.id as LineModeOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.lineMode === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -164,7 +165,7 @@
         </div>
 
         <!-- Jarak Antar Baris -->
-        <div class="flex flex-col gap-1.5 pt-1">
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Jarak Antar Baris (Line Spacing):</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -175,7 +176,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ lineSpacing: opt.id as LineSpacingOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.lineSpacing === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -187,7 +188,7 @@
         </div>
 
         <!-- Keredupan Lirik Lain -->
-        <div class="flex flex-col gap-1.5 pt-1">
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Keredupan Lirik Non-Aktif:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -198,7 +199,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ inactiveOpacity: opt.id as InactiveOpacityOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.inactiveOpacity === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -211,7 +212,7 @@
 
       {:else if activeTab === 'theme'}
         <!-- Tema Warna Lirik -->
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1">
           <span class="text-white/60 text-[11px] font-medium">Tema Warna Highlight:</span>
           <div class="grid grid-cols-4 gap-2">
             {#each [
@@ -223,7 +224,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ highlightTheme: opt.id as HighlightThemeOption })}
-                class="py-1.5 px-2 rounded-lg border flex flex-col items-center gap-1 transition-all cursor-pointer font-medium
+                class="py-1 px-2 rounded-lg border flex flex-col items-center gap-1 transition-all cursor-pointer font-medium
                   {$displaySettings.highlightTheme === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
@@ -236,7 +237,7 @@
         </div>
 
         <!-- Latar Belakang HUD -->
-        <div class="flex flex-col gap-1.5 pt-1">
+        <div class="flex flex-col gap-1 pt-0.5">
           <span class="text-white/60 text-[11px] font-medium">Gaya Latar Belakang HUD:</span>
           <div class="grid grid-cols-3 gap-2">
             {#each [
@@ -247,7 +248,7 @@
               <button
                 type="button"
                 on:click={() => updateDisplaySettings({ backgroundStyle: opt.id as BackgroundStyleOption })}
-                class="py-1.5 px-3 rounded-lg border text-center transition-all cursor-pointer font-medium
+                class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.backgroundStyle === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"

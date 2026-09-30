@@ -15,7 +15,15 @@
 
   // 3-Line Sliding Window
   $: visibleTripleLines = (() => {
-    if (!$lyrics || $lyrics.length === 0 || $activeLineIndex < 0) return [];
+    if (!$lyrics || $lyrics.length === 0) return [];
+
+    if ($activeLineIndex < 0) {
+      return [
+        { key: 'intro-prev', line: null, isPast: true, isActive: false },
+        { key: 'intro-curr', line: { timeMs: 0, text: '♪ ... ♪' }, isPast: false, isActive: true },
+        { key: 'intro-next', line: $lyrics[0], isPast: false, isActive: false },
+      ];
+    }
 
     const prev = $activeLineIndex > 0 ? $lyrics[$activeLineIndex - 1] : null;
     const curr = $lyrics[$activeLineIndex];
@@ -30,10 +38,10 @@
 
   // Spacing class
   $: spacingClass = $displaySettings.lineSpacing === 'compact'
-    ? 'gap-1'
+    ? 'gap-0.5'
     : $displaySettings.lineSpacing === 'relaxed'
-    ? 'gap-4'
-    : 'gap-2.5';
+    ? 'gap-2.5'
+    : 'gap-1.5';
 
   // Alignment container class
   $: alignClass = $displaySettings.alignment === 'left'
@@ -65,8 +73,8 @@
   bind:clientHeight={viewportHeight}
   class="relative flex-1 w-full min-h-[70px] overflow-hidden no-scrollbar flex flex-col justify-center {alignClass}"
   style="
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
   "
 >
   {#if $lyrics.length === 0}
