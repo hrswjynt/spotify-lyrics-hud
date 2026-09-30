@@ -49,6 +49,23 @@ describe('displaySettings Store', () => {
     expect(current.lineMode).toBe('triple'); // preserved
   });
 
+  it('supports right and center alignments seamlessly', () => {
+    updateDisplaySettings({ alignment: 'right' });
+    let current: any;
+    let unsub = displaySettings.subscribe((val) => {
+      current = val;
+    });
+    unsub();
+    expect(current.alignment).toBe('right');
+
+    updateDisplaySettings({ alignment: 'center' });
+    unsub = displaySettings.subscribe((val) => {
+      current = val;
+    });
+    unsub();
+    expect(current.alignment).toBe('center');
+  });
+
   it('resets to default settings cleanly', () => {
     updateDisplaySettings({
       fontSize: 'sm',

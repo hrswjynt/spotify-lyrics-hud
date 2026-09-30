@@ -72,19 +72,19 @@
 </script>
 
 <div
-  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-2 transition-all duration-300 ease-out select-none
+  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-4 transition-all duration-300 ease-out select-none
     {isActive
-      ? 'scale-105 font-bold'
+      ? 'font-bold'
       : isPast
-      ? `scale-95 font-medium ${inactiveOpacityClass}`
-      : `scale-98 font-medium ${inactiveOpacityClass} hover:opacity-90`}"
+      ? `font-medium ${inactiveOpacityClass}`
+      : `font-medium ${inactiveOpacityClass} hover:opacity-90`}"
 >
   {#if !text || text.trim() === ''}
-    <p class="{isActive ? activeSizeClass : inactiveSizeClass} tracking-normal opacity-25 select-none">♪</p>
+    <p class="{isActive ? activeSizeClass : inactiveSizeClass} tracking-normal opacity-25 select-none inline-block">♪</p>
   {:else if isActive}
     {#if $karaokeMode}
       <p
-        class="{activeSizeClass} tracking-wide leading-snug inline-block drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+        class="{activeSizeClass} tracking-wide leading-snug inline-block max-w-full drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
         style="
           background: {gradientBackground};
           -webkit-background-clip: text;
@@ -94,12 +94,12 @@
         {text}
       </p>
     {:else}
-      <p class="{activeSizeClass} tracking-wide leading-snug inline-block {solidThemeClass}">
+      <p class="{activeSizeClass} tracking-wide leading-snug inline-block max-w-full {solidThemeClass}">
         {text}
       </p>
     {/if}
   {:else}
-    <p class="{inactiveSizeClass} text-white tracking-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
+    <p class="{inactiveSizeClass} text-white tracking-normal leading-snug inline-block max-w-full drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
       {text}
     </p>
   {/if}

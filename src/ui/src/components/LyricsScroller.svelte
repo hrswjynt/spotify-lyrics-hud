@@ -86,7 +86,7 @@
 
 <div
   bind:clientHeight={viewportHeight}
-  class="relative flex-1 w-full min-h-[70px] overflow-hidden no-scrollbar {alignClass}"
+  class="relative flex-1 w-full min-h-[70px] overflow-hidden no-scrollbar"
   style="
     mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
@@ -111,7 +111,7 @@
       {#each $lyrics as line, idx (line.timeMs)}
         <div
           bind:this={lineElements[idx]}
-          class="w-full flex {alignClass} shrink-0 transition-opacity duration-300"
+          class="w-full shrink-0 transition-opacity duration-300"
           style={getLineStyle(idx, $activeLineIndex, $displaySettings.lineMode)}
         >
           <LyricsLine
