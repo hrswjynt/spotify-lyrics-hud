@@ -81,7 +81,7 @@ Inside the in-place Settings Modal (opened via `⚙️` in the HUD or via System
 
 ```bash
 # Clone repository
-git clone https://github.com/<your-username>/spotify-lyrics-hud.git
+git clone https://github.com/hariswijayanto/spotify-lyrics-hud.git
 cd spotify-lyrics-hud
 
 # Install dependencies
@@ -117,7 +117,7 @@ cp src-tauri/target/release/desktop-overlay ~/.local/bin/spotify-lyrics-hud
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/<your-username>/spotify-lyrics-hud/issues) or see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/hariswijayanto/spotify-lyrics-hud/issues) or see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 

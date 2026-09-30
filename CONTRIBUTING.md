@@ -8,7 +8,7 @@ Thank you for considering contributing to **Spotify Lyrics HUD**!
 
 1. **Fork and clone the repo**:
    ```bash
-   git clone https://github.com/<your-username>/spotify-lyrics-hud.git
+   git clone https://github.com/hariswijayanto/spotify-lyrics-hud.git
    cd spotify-lyrics-hud
    ```
 
