@@ -71,6 +71,7 @@ describe('displaySettings Store', () => {
       fontSize: 'sm',
       fontFamily: 'mono',
       lineMode: 'single',
+      scale: '0.75',
     });
 
     resetDisplaySettings();
@@ -82,5 +83,20 @@ describe('displaySettings Store', () => {
     unsub();
 
     expect(current).toEqual(DEFAULT_DISPLAY_SETTINGS);
+    expect(current.scale).toBe('1');
+  });
+
+  it('supports scale presets seamlessly', () => {
+    expect(DEFAULT_DISPLAY_SETTINGS.scale).toBe('1');
+
+    for (const s of ['0.5', '0.75', '1', '1.25', '1.5'] as const) {
+      updateDisplaySettings({ scale: s });
+      let current: any;
+      const unsub = displaySettings.subscribe((val) => {
+        current = val;
+      });
+      unsub();
+      expect(current.scale).toBe(s);
+    }
   });
 });

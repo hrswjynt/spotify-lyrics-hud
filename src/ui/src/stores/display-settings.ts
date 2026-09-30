@@ -8,6 +8,7 @@ export type LineSpacingOption = 'compact' | 'balanced' | 'relaxed';
 export type HighlightThemeOption = 'emerald' | 'cyan' | 'violet' | 'white';
 export type InactiveOpacityOption = 'subtle' | 'balanced' | 'clear';
 export type BackgroundStyleOption = 'glass' | 'minimal' | 'solid';
+export type ScaleOption = '0.5' | '0.75' | '1' | '1.25' | '1.5';
 
 export interface DisplaySettings {
   fontSize: FontSizeOption;
@@ -18,6 +19,7 @@ export interface DisplaySettings {
   highlightTheme: HighlightThemeOption;
   inactiveOpacity: InactiveOpacityOption;
   backgroundStyle: BackgroundStyleOption;
+  scale: ScaleOption;
 }
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
@@ -29,6 +31,7 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   highlightTheme: 'emerald',
   inactiveOpacity: 'balanced',
   backgroundStyle: 'glass',
+  scale: '1',
 };
 
 const STORAGE_KEY = 'overlay_display_settings';
