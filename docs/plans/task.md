@@ -32,4 +32,7 @@
 | TASK-30 | Tauri: TypeScript Tauri Platform Adapter & Tests | Completed | TASK-29 |
 | TASK-31 | Tauri: Full Integration & Compilation Verification | Completed | TASK-30 |
 | TASK-32 | Fix missing lyrics in HUD (subscriber replay, metadata fields, lifecycle order) & verify live | Completed | TASK-31 |
+| TASK-33 | Karaoke Mode Toggle (ON/OFF) & HUD Dimensions Optimization | Completed | TASK-32 |
+| TASK-34 | Display Settings Panel (Typography, Alignment, Spacing, Dimming, Themes) & 3-Line Centered Layout | In Progress | TASK-33 |
+
 
