@@ -93,12 +93,19 @@
   });
 </script>
 
-<main
-  class="w-full h-full flex flex-col p-2 bg-transparent overflow-hidden box-border"
-  style="zoom: {scaleFactor};"
->
-  <div class="w-full h-full flex flex-col min-h-0">
-    <LyricsHUD />
+<main class="w-full h-full overflow-hidden bg-transparent select-none box-border p-0 m-0">
+  <div
+    class="origin-top-left shrink-0 p-2 box-border flex flex-col"
+    style="
+      width: 750px;
+      height: 275px;
+      transform: scale({scaleFactor});
+      transform-origin: 0 0;
+    "
+  >
+    <div class="w-full h-full flex flex-col min-h-0">
+      <LyricsHUD />
+    </div>
   </div>
 </main>
 

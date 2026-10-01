@@ -115,7 +115,7 @@
         backface-visibility: hidden;
       "
     >
-      {#each $lyrics as line, idx (line.timeMs)}
+      {#each $lyrics as line, idx (idx + '-' + line.timeMs)}
         <div
           id="lyric-{idx}"
           bind:this={lineElements[idx]}

@@ -49,13 +49,24 @@ pub fn set_overlay_geometry(
     width: u32,
     height: u32,
 ) -> Result<(), String> {
-    window
-        .set_position(Position::Physical(PhysicalPosition::new(x, y)))
-        .map_err(|e| e.to_string())?;
+    eprintln!("[set_overlay_geometry] x={}, y={}, w={}, h={}", x, y, width, height);
 
-    window
-        .set_size(Size::Physical(PhysicalSize::new(width, height)))
-        .map_err(|e| e.to_string())?;
+    // 1. Position update (native on Windows/X11, ignored/error on Wayland)
+    let _ = window.set_position(Position::Physical(PhysicalPosition::new(x, y)));
+
+    // 2. Size update (Tauri webview window size)
+    let _ = window.set_size(Size::Physical(PhysicalSize::new(width, height)));
+
+    // 3. If on Hyprland, dispatch resize and move directly to compositor
+    if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
+        let script = format!(
+            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "desktop-overlay" then hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = {}, y = {}, relative = false }})) end end"#,
+            width, height, x, y
+        );
+        let _ = Command::new("hyprctl")
+            .args(["repl", &script])
+            .output();
+    }
 
     Ok(())
 }
