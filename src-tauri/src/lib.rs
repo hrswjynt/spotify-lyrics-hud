@@ -43,7 +43,8 @@ pub fn run() {
             commands::control_spotify_mpris,
             commands::update_native_tray_menu,
             commands::log_from_js,
-            commands::fetch_lyrics_lrclib
+            commands::fetch_lyrics_lrclib,
+            commands::convert_lyrics_to_romaji
         ])
 
 

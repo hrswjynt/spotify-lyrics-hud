@@ -495,5 +495,10 @@ pub fn fetch_lyrics_lrclib(
     Ok(None)
 }
 
+#[tauri::command]
+pub fn convert_lyrics_to_romaji(lines: Vec<String>) -> Result<Vec<Option<String>>, String> {
+    Ok(crate::romaji::transliterate_lines(&lines))
+}
+
 
 
