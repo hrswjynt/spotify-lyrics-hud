@@ -31,7 +31,7 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon<R>, Box<dy
 
     let tray = TrayIconBuilder::with_id("main-tray")
         .icon(icon)
-        .tooltip("Spotify Overlay HUD")
+        .tooltip("Spotify Lyrics HUD")
         .menu(&menu)
         .on_menu_event(|app, event| {
             let id = event.id.as_ref();

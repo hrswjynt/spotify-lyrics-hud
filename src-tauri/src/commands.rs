@@ -60,7 +60,7 @@ pub fn set_overlay_geometry(
     // 3. If on Hyprland, dispatch resize and move directly to compositor
     if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
         let script = format!(
-            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "desktop-overlay" then hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = {}, y = {}, relative = false }})) end end"#,
+            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "spotify-lyrics-hud" or w.class == "desktop-overlay" then hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = {}, y = {}, relative = false }})) end end"#,
             width, height, x, y
         );
         let _ = Command::new("hyprctl")
@@ -85,7 +85,7 @@ pub fn set_overlay_size(
     // 2. If on Hyprland, resize while preserving the current center position
     if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
         let script = format!(
-            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "desktop-overlay" then local cx = w.at.x + w.size.x / 2; local cy = w.at.y + w.size.y / 2; local nx = math.floor(cx - {} / 2); local ny = math.floor(cy - {} / 2); hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = nx, y = ny, relative = false }})) end end"#,
+            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "spotify-lyrics-hud" or w.class == "desktop-overlay" then local cx = w.at.x + w.size.x / 2; local cy = w.at.y + w.size.y / 2; local nx = math.floor(cx - {} / 2); local ny = math.floor(cy - {} / 2); hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = nx, y = ny, relative = false }})) end end"#,
             width, height, width, height
         );
         let _ = Command::new("hyprctl")
