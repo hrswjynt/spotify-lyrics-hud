@@ -14,6 +14,7 @@
     InactiveOpacityOption,
     BackgroundStyleOption,
     ScaleOption,
+    JapaneseLyricsModeOption,
   } from '../stores/display-settings.js';
 
   export let isOpen: boolean = false;
@@ -132,6 +133,29 @@
                 on:click={() => updateDisplaySettings({ alignment: opt.id as TextAlignmentOption })}
                 class="py-1 px-2.5 rounded-lg border text-center transition-all cursor-pointer font-medium
                   {$displaySettings.alignment === opt.id
+                    ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
+                    : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
+              >
+                {opt.label}
+              </button>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Lirik Bahasa Jepang (Romaji) -->
+        <div class="flex flex-col gap-1 pt-0.5">
+          <span class="text-white/60 text-[11px] font-medium">Lirik Bahasa Jepang:</span>
+          <div class="grid grid-cols-3 gap-2">
+            {#each [
+              { id: 'dual', label: 'Dual (+ Romaji)' },
+              { id: 'romaji', label: 'Romaji Saja' },
+              { id: 'original', label: 'Asli Saja' }
+            ] as opt}
+              <button
+                type="button"
+                on:click={() => updateDisplaySettings({ japaneseMode: opt.id as JapaneseLyricsModeOption })}
+                class="py-1 px-1.5 rounded-lg border text-center transition-all cursor-pointer font-medium text-[11px]
+                  {$displaySettings.japaneseMode === opt.id
                     ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 font-bold shadow-sm'
                     : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'}"
               >
