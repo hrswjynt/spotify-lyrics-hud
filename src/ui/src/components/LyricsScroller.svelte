@@ -124,6 +124,7 @@
         >
           <LyricsLine
             text={line.text}
+            romaji={line.romaji}
             isActive={idx === $activeLineIndex}
             isPast={idx < $activeLineIndex}
             progress={idx === $activeLineIndex ? $lineProgress : 0}

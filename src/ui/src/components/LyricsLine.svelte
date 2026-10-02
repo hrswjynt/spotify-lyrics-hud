@@ -3,13 +3,19 @@
   import { displaySettings } from '../stores/display-settings.js';
 
   export let text: string = '';
+  export let romaji: string | undefined = undefined;
   export let isActive: boolean = false;
   export let isPast: boolean = false;
   export let progress: number = 0; // 0.0 to 1.0
 
   $: fillPercent = Math.min(100, Math.max(0, Math.round(progress * 100)));
 
-  // Font Size Classes
+  // Japanese Mode calculations
+  $: showDual = Boolean(romaji && $displaySettings.japaneseMode === 'dual');
+  $: showRomajiOnly = Boolean(romaji && $displaySettings.japaneseMode === 'romaji');
+  $: primaryText = showRomajiOnly ? (romaji || text) : text;
+
+  // Font Size Classes (Primary Text)
   $: activeSizeClass = $displaySettings.fontSize === 'sm'
     ? 'text-lg md:text-xl'
     : $displaySettings.fontSize === 'lg'
@@ -21,6 +27,19 @@
     : $displaySettings.fontSize === 'lg'
     ? 'text-lg md:text-xl'
     : 'text-base md:text-lg';
+
+  // Romaji Font Size Classes (Dual Sub-line)
+  $: romajiActiveSizeClass = $displaySettings.fontSize === 'sm'
+    ? 'text-xs md:text-sm'
+    : $displaySettings.fontSize === 'lg'
+    ? 'text-base md:text-lg'
+    : 'text-sm md:text-base';
+
+  $: romajiInactiveSizeClass = $displaySettings.fontSize === 'sm'
+    ? 'text-[11px] md:text-xs'
+    : $displaySettings.fontSize === 'lg'
+    ? 'text-sm md:text-base'
+    : 'text-xs md:text-sm';
 
   // Font Family Class
   $: fontFamClass = $displaySettings.fontFamily === 'mono'
@@ -72,14 +91,14 @@
 </script>
 
 <div
-  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-4 transition-all duration-500 ease-out select-none
+  class="w-full {textAlignClass} {fontFamClass} py-0.5 px-4 transition-all duration-500 ease-out select-none flex flex-col justify-center
     {isActive
       ? 'font-bold'
       : isPast
       ? `font-medium ${inactiveOpacityClass}`
       : `font-medium ${inactiveOpacityClass} hover:opacity-90`}"
 >
-  {#if !text || text.trim() === ''}
+  {#if !primaryText || primaryText.trim() === ''}
     {#if isActive}
       <p class="{activeSizeClass} tracking-normal opacity-30 select-none inline-block animate-pulse">♪</p>
     {:else}
@@ -95,16 +114,38 @@
           -webkit-text-fill-color: transparent;
         "
       >
-        {text}
+        {primaryText}
       </p>
+      {#if showDual && romaji}
+        <p
+          class="{romajiActiveSizeClass} font-medium tracking-wide leading-snug inline-block max-w-full opacity-90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] mt-0.5"
+          style="
+            background: {gradientBackground};
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          "
+        >
+          {romaji}
+        </p>
+      {/if}
     {:else}
       <p class="{activeSizeClass} tracking-wide leading-snug inline-block max-w-full {solidThemeClass}">
-        {text}
+        {primaryText}
       </p>
+      {#if showDual && romaji}
+        <p class="{romajiActiveSizeClass} font-medium tracking-wide leading-snug inline-block max-w-full opacity-90 mt-0.5 {solidThemeClass}">
+          {romaji}
+        </p>
+      {/if}
     {/if}
   {:else}
     <p class="{inactiveSizeClass} text-white tracking-normal leading-snug inline-block max-w-full drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-      {text}
+      {primaryText}
     </p>
+    {#if showDual && romaji}
+      <p class="{romajiInactiveSizeClass} text-white/80 font-normal tracking-normal leading-snug inline-block max-w-full drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] mt-0.5">
+        {romaji}
+      </p>
+    {/if}
   {/if}
 </div>

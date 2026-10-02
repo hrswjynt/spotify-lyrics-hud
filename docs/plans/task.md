@@ -41,3 +41,10 @@
 | TASK-39 | HUD Global Scale Settings (0.5x, 0.75x, 1.0x, 1.25x, 1.5x) & Window Dynamic Sizing | Completed | TASK-38 |
 | TASK-40 | Proportional Canvas CSS Transform Scaling (750x275 Reference) & Hyprland Window Resize | Completed | TASK-39 |
 | TASK-41 | In-Place Window Resizing (set_overlay_size) Preserving User Screen Coordinates | Completed | TASK-40 |
+| TASK-42 | Rust: Add sabiyomi dependency & implement romaji module with unit tests | Completed | TASK-41 |
+| TASK-43 | Rust: Register convert_lyrics_to_romaji Tauri command | Completed | TASK-42 |
+| TASK-44 | UI: Add japaneseMode to DisplaySettings store & tests | Completed | TASK-43 |
+| TASK-45 | Data: Attach romaji property to LyricLine in tauri-bootstrap | Completed | TASK-44 |
+| TASK-46 | UI: Implement Dual Mode with Simultaneous Karaoke Sweep in LyricsLine.svelte | Completed | TASK-45 |
+| TASK-47 | UI: Add Japanese Lyrics mode selector to SettingsModal.svelte | In Progress | TASK-46 |
+| TASK-48 | Verification: End-to-end testing, local compilation & live verification | Pending | TASK-47 |
