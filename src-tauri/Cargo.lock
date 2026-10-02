@@ -2929,13 +2929,14 @@ dependencies = [
 
 [[package]]
 name = "spotify-lyrics-hud"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-global-shortcut",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

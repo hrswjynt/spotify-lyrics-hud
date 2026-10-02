@@ -82,7 +82,19 @@ pub fn set_overlay_size(
     // 1. Size update (Tauri webview window size)
     let _ = window.set_size(Size::Physical(PhysicalSize::new(width, height)));
 
-    // 2. If on Hyprland, resize while preserving the current center position
+    // 2. If on Windows, resize while preserving the current center position
+    #[cfg(target_os = "windows")]
+    {
+        if let (Ok(pos), Ok(size)) = (window.outer_position(), window.outer_size()) {
+            let cx = pos.x + (size.width as i32) / 2;
+            let cy = pos.y + (size.height as i32) / 2;
+            let nx = cx - (width as i32) / 2;
+            let ny = cy - (height as i32) / 2;
+            let _ = window.set_position(Position::Physical(PhysicalPosition::new(nx, ny)));
+        }
+    }
+
+    // 3. If on Hyprland, resize while preserving the current center position
     if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
         let script = format!(
             r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "spotify-lyrics-hud" or w.class == "desktop-overlay" then local cx = w.at.x + w.size.x / 2; local cy = w.at.y + w.size.y / 2; local nx = math.floor(cx - {} / 2); local ny = math.floor(cy - {} / 2); hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = nx, y = ny, relative = false }})) end end"#,
@@ -153,78 +165,264 @@ pub fn get_native_monitors(app: AppHandle) -> Result<Vec<NativeMonitorInfo>, Str
     Ok(result)
 }
 
-#[tauri::command]
-pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
-    // Check if playerctl is installed and Spotify is running
-    let status_output = Command::new("playerctl")
-        .args(["-p", "spotify", "status"])
-        .output();
-
-    let status_str = match status_output {
-        Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
-        _ => return Ok(None),
+#[cfg(target_os = "windows")]
+fn query_spotify_windows() -> Result<Option<NativeSpotifyStatus>, String> {
+    use windows_sys::Win32::Foundation::{BOOL, HWND, LPARAM};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        EnumWindows, GetWindowTextW, GetWindowThreadProcessId, IsWindowVisible,
     };
-
-    let meta_output = Command::new("playerctl")
-        .args([
-            "-p",
-            "spotify",
-            "metadata",
-            "--format",
-            "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}:::{{mpris:artUrl}}",
-        ])
-        .output();
-
-    let meta_str = match meta_output {
-        Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
-        _ => return Ok(None),
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
     };
+    use windows_sys::Win32::System::ProcessStatus::GetProcessImageFileNameW;
 
-    let parts: Vec<&str> = meta_str.split(":::").collect();
-    if parts.len() < 5 {
-        return Ok(None);
+    struct Context {
+        status: Option<NativeSpotifyStatus>,
     }
 
-    let title = parts[0].to_string();
-    let artist = parts[1].to_string();
-    let album = parts[2].to_string();
+    unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
+        let ctx = &mut *(lparam as *mut Context);
+        if IsWindowVisible(hwnd) == 0 {
+            return 1;
+        }
 
-    let length_us: u64 = parts[3].parse().unwrap_or(0);
-    let position_us: u64 = parts[4].parse().unwrap_or(0);
-    let album_art_url = if parts.len() >= 6 && !parts[5].is_empty() {
-        Some(parts[5].to_string())
-    } else {
-        None
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if pid == 0 {
+            return 1;
+        }
+
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if handle.is_null() {
+            return 1;
+        }
+
+        let mut img_buf = [0u16; 512];
+        let len = GetProcessImageFileNameW(handle, img_buf.as_mut_ptr(), 512);
+        let _ = windows_sys::Win32::Foundation::CloseHandle(handle);
+
+        if len == 0 {
+            return 1;
+        }
+
+        let img_name = String::from_utf16_lossy(&img_buf[..len as usize]);
+        if !img_name.to_lowercase().ends_with("spotify.exe") {
+            return 1;
+        }
+
+        let mut title_buf = [0u16; 512];
+        let title_len = GetWindowTextW(hwnd, title_buf.as_mut_ptr(), 512);
+        if title_len == 0 {
+            return 1;
+        }
+
+        let title_str = String::from_utf16_lossy(&title_buf[..title_len as usize]).trim().to_string();
+        if title_str.is_empty() {
+            return 1;
+        }
+
+        if title_str == "Spotify" || title_str == "Spotify Free" || title_str == "Spotify Premium" || title_str == "Advertisement" {
+            ctx.status = Some(NativeSpotifyStatus {
+                status: "Paused".into(),
+                title: "".into(),
+                artist: "".into(),
+                album: "".into(),
+                album_art_url: None,
+                duration_ms: 0,
+                position_ms: 0,
+            });
+            return 0;
+        }
+
+        if let Some((artist, track)) = title_str.split_once(" - ") {
+            ctx.status = Some(NativeSpotifyStatus {
+                status: "Playing".into(),
+                title: track.trim().to_string(),
+                artist: artist.trim().to_string(),
+                album: "".into(),
+                album_art_url: None,
+                duration_ms: 0,
+                position_ms: 0,
+            });
+            return 0;
+        }
+
+        1
+    }
+
+    let mut ctx = Context { status: None };
+    unsafe {
+        EnumWindows(Some(enum_proc), &mut ctx as *mut _ as LPARAM);
+    }
+
+    Ok(ctx.status)
+}
+
+#[cfg(target_os = "windows")]
+fn control_spotify_windows(action: &str) -> Result<bool, String> {
+    use windows_sys::Win32::Foundation::{BOOL, HWND, LPARAM};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        EnumWindows, GetWindowThreadProcessId, SendMessageW, WM_APPCOMMAND,
+    };
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
+    };
+    use windows_sys::Win32::System::ProcessStatus::GetProcessImageFileNameW;
+
+    const APPCOMMAND_MEDIA_NEXTTRACK: u32 = 11;
+    const APPCOMMAND_MEDIA_PREVIOUSTRACK: u32 = 12;
+    const APPCOMMAND_MEDIA_STOP: u32 = 13;
+    const APPCOMMAND_MEDIA_PLAY_PAUSE: u32 = 14;
+
+    let cmd = match action {
+        "play-pause" | "play" | "pause" => APPCOMMAND_MEDIA_PLAY_PAUSE,
+        "next" => APPCOMMAND_MEDIA_NEXTTRACK,
+        "previous" => APPCOMMAND_MEDIA_PREVIOUSTRACK,
+        "stop" => APPCOMMAND_MEDIA_STOP,
+        _ => return Err("Invalid Spotify action".into()),
     };
 
-    Ok(Some(NativeSpotifyStatus {
-        status: status_str,
-        title,
-        artist,
-        album,
-        album_art_url,
-        duration_ms: length_us / 1000,
-        position_ms: position_us / 1000,
-    }))
+    struct FindCtx {
+        target_hwnd: Option<HWND>,
+    }
+
+    unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
+        let ctx = &mut *(lparam as *mut FindCtx);
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if pid == 0 {
+            return 1;
+        }
+
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if handle.is_null() {
+            return 1;
+        }
+
+        let mut img_buf = [0u16; 512];
+        let len = GetProcessImageFileNameW(handle, img_buf.as_mut_ptr(), 512);
+        let _ = windows_sys::Win32::Foundation::CloseHandle(handle);
+
+        if len > 0 {
+            let img_name = String::from_utf16_lossy(&img_buf[..len as usize]);
+            if img_name.to_lowercase().ends_with("spotify.exe") {
+                ctx.target_hwnd = Some(hwnd);
+                return 0;
+            }
+        }
+        1
+    }
+
+    let mut ctx = FindCtx { target_hwnd: None };
+    unsafe {
+        EnumWindows(Some(enum_proc), &mut ctx as *mut _ as LPARAM);
+        if let Some(hwnd) = ctx.target_hwnd {
+            SendMessageW(hwnd, WM_APPCOMMAND, 0, (cmd << 16) as LPARAM);
+            return Ok(true);
+        }
+    }
+
+    Ok(false)
+}
+
+#[tauri::command]
+pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
+    #[cfg(target_os = "linux")]
+    {
+        // Check if playerctl is installed and Spotify is running
+        let status_output = Command::new("playerctl")
+            .args(["-p", "spotify", "status"])
+            .output();
+
+        let status_str = match status_output {
+            Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
+            _ => return Ok(None),
+        };
+
+        let meta_output = Command::new("playerctl")
+            .args([
+                "-p",
+                "spotify",
+                "metadata",
+                "--format",
+                "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}:::{{mpris:artUrl}}",
+            ])
+            .output();
+
+        let meta_str = match meta_output {
+            Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
+            _ => return Ok(None),
+        };
+
+        let parts: Vec<&str> = meta_str.split(":::").collect();
+        if parts.len() < 5 {
+            return Ok(None);
+        }
+
+        let title = parts[0].to_string();
+        let artist = parts[1].to_string();
+        let album = parts[2].to_string();
+
+        let length_us: u64 = parts[3].parse().unwrap_or(0);
+        let position_us: u64 = parts[4].parse().unwrap_or(0);
+        let album_art_url = if parts.len() >= 6 && !parts[5].is_empty() {
+            Some(parts[5].to_string())
+        } else {
+            None
+        };
+
+        Ok(Some(NativeSpotifyStatus {
+            status: status_str,
+            title,
+            artist,
+            album,
+            album_art_url,
+            duration_ms: length_us / 1000,
+            position_ms: position_us / 1000,
+        }))
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        query_spotify_windows()
+    }
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        Ok(None)
+    }
 }
 
 #[tauri::command]
 pub fn control_spotify_mpris(action: String) -> Result<bool, String> {
-    let subcmd = match action.as_str() {
-        "play-pause" => "play-pause",
-        "next" => "next",
-        "previous" => "previous",
-        "play" => "play",
-        "pause" => "pause",
-        _ => return Err("Invalid Spotify action".to_string()),
-    };
+    #[cfg(target_os = "linux")]
+    {
+        let subcmd = match action.as_str() {
+            "play-pause" => "play-pause",
+            "next" => "next",
+            "previous" => "previous",
+            "play" => "play",
+            "pause" => "pause",
+            _ => return Err("Invalid Spotify action".to_string()),
+        };
 
-    let output = Command::new("playerctl")
-        .args(["-p", "spotify", subcmd])
-        .output()
-        .map_err(|e| e.to_string())?;
+        let output = Command::new("playerctl")
+            .args(["-p", "spotify", subcmd])
+            .output()
+            .map_err(|e| e.to_string())?;
 
-    Ok(output.status.success())
+        Ok(output.status.success())
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        control_spotify_windows(&action)
+    }
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        Err("Unsupported platform for Spotify control".to_string())
+    }
 }
 
 #[tauri::command]
