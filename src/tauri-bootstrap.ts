@@ -73,11 +73,32 @@ export async function initTauriRuntime(): Promise<{
   });
 
   // Sync Spotify changes to UI stores
-  spotify.onTrack((track, lyrics) => {
+  spotify.onTrack(async (track, rawLyrics) => {
     void invoke('log_from_js', {
       level: 'INFO',
-      msg: `Track: "${track.title}" by "${track.artist}" | Lyrics: ${lyrics.length} lines | Art: ${track.albumArtUrl ? 'Yes' : 'No'}`,
+      msg: `Track: "${track.title}" by "${track.artist}" | Lyrics: ${rawLyrics.length} lines | Art: ${track.albumArtUrl ? 'Yes' : 'No'}`,
     });
+
+    let lines: LyricLine[] = rawLyrics.map((l) => ({ timeMs: l.timeMs, text: l.text }));
+
+    // If lyrics are present, check for Japanese transliteration
+    if (lines.length > 0) {
+      try {
+        const textLines = lines.map((l) => l.text);
+        const romajiResults = await invoke<Array<string | null>>('convert_lyrics_to_romaji', {
+          lines: textLines,
+        });
+        if (Array.isArray(romajiResults)) {
+          lines = lines.map((line, idx) => ({
+            ...line,
+            romaji: romajiResults[idx] || undefined,
+          }));
+        }
+      } catch (err) {
+        console.warn('[Romaji] Transliteration failed:', err);
+      }
+    }
+
     setTrack(
       {
         title: track.title,
@@ -86,7 +107,7 @@ export async function initTauriRuntime(): Promise<{
         albumArtUrl: track.albumArtUrl,
         durationMs: track.durationMs,
       },
-      lyrics.map((l) => ({ timeMs: l.timeMs, text: l.text })),
+      lines,
       spotify.getCurrentPositionMs(),
       spotify.getIsPlaying()
     );
