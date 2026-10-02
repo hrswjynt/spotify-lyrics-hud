@@ -47,4 +47,4 @@
 | TASK-45 | Data: Attach romaji property to LyricLine in tauri-bootstrap | Completed | TASK-44 |
 | TASK-46 | UI: Implement Dual Mode with Simultaneous Karaoke Sweep in LyricsLine.svelte | Completed | TASK-45 |
 | TASK-47 | UI: Add Japanese Lyrics mode selector to SettingsModal.svelte | Completed | TASK-46 |
-| TASK-48 | Verification: End-to-end testing, local compilation & live verification | In Progress | TASK-47 |
+| TASK-48 | Verification: End-to-end testing, local compilation & live verification | Completed | TASK-47 |
