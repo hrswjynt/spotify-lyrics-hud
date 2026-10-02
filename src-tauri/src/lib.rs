@@ -1,4 +1,5 @@
 pub mod commands;
+pub mod romaji;
 pub mod tray;
 
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
