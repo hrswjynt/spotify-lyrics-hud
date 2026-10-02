@@ -118,6 +118,14 @@ export class OverlayEngine {
     return this.lastResolvedState ? { ...this.lastResolvedState } : undefined;
   }
 
+  public updatePlacementSize(size: { width: number; height: number }): void {
+    this.currentIntent.placement.size = { ...size };
+    if (this.lastResolvedState) {
+      this.lastResolvedState.geometry.width = size.width;
+      this.lastResolvedState.geometry.height = size.height;
+    }
+  }
+
   public updateCursorPosition(point: Point): void {
     this.activeCursorPosition = point;
     if (this.currentIntent.display.type === 'cursor') {

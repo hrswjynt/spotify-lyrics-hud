@@ -1,4 +1,4 @@
-import { TauriPlatformAdapter } from './platform/tauri/index.js';
+import { TauriPlatformAdapter, TauriOverlayWindow } from './platform/tauri/index.js';
 import { OverlayEngine } from './core/overlay-engine.js';
 import { SystemController } from './system/system-controller.js';
 import { TrayDisplaySettings } from './system/tray/menu-items.js';
@@ -168,17 +168,17 @@ export async function initTauriRuntime(): Promise<{
         const factor = parseFloat(s.scale) || 1.0;
         const targetWidth = Math.round(750 * factor);
         const targetHeight = Math.round(275 * factor);
-        const currentIntent = engine.getIntent();
-        void engine.setIntent({
-          ...currentIntent,
-          placement: {
-            ...currentIntent.placement,
-            size: { width: targetWidth, height: targetHeight },
-          },
-        });
+
+        if (windowHandle instanceof TauriOverlayWindow) {
+          windowHandle.setSize(targetWidth, targetHeight);
+        } else {
+          void invoke('set_overlay_size', { width: targetWidth, height: targetHeight });
+        }
+        engine.updatePlacementSize({ width: targetWidth, height: targetHeight });
+
         void invoke('log_from_js', {
           level: 'INFO',
-          msg: `Overlay scaled to ${s.scale}x (${targetWidth}x${targetHeight})`,
+          msg: `Overlay scaled to ${s.scale}x (${targetWidth}x${targetHeight}) in place`,
         });
       }
     }

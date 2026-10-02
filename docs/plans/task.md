@@ -40,3 +40,4 @@
 | TASK-38 | Pure CSS GPU Hardware-Accelerated Smooth Translation (600ms cubic-bezier ease-out) | Completed | TASK-37 |
 | TASK-39 | HUD Global Scale Settings (0.5x, 0.75x, 1.0x, 1.25x, 1.5x) & Window Dynamic Sizing | Completed | TASK-38 |
 | TASK-40 | Proportional Canvas CSS Transform Scaling (750x275 Reference) & Hyprland Window Resize | Completed | TASK-39 |
+| TASK-41 | In-Place Window Resizing (set_overlay_size) Preserving User Screen Coordinates | Completed | TASK-40 |

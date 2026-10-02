@@ -40,6 +40,19 @@ describe('Tauri Platform Adapter', () => {
       });
     });
 
+    it('invokes set_overlay_size on setSize', () => {
+      const mockInvoke = vi.fn().mockResolvedValue(undefined);
+      const window = new TauriOverlayWindow({ invoke: mockInvoke });
+
+      window.setSize(563, 206);
+      expect(mockInvoke).toHaveBeenCalledWith('set_overlay_size', {
+        width: 563,
+        height: 206,
+      });
+      expect(window.getActualState().geometry.width).toBe(563);
+      expect(window.getActualState().geometry.height).toBe(206);
+    });
+
     it('invokes set_overlay_visibility on setVisibility', () => {
       const mockInvoke = vi.fn().mockResolvedValue(undefined);
       const window = new TauriOverlayWindow({ invoke: mockInvoke });

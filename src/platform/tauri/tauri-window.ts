@@ -48,6 +48,15 @@ export class TauriOverlayWindow implements OverlayWindow {
     });
   }
 
+  public setSize(width: number, height: number): void {
+    this.state.geometry.width = width;
+    this.state.geometry.height = height;
+    void this.invoke('set_overlay_size', {
+      width: Math.round(width),
+      height: Math.round(height),
+    });
+  }
+
   public setVisibility(visible: boolean): void {
     this.state.visible = visible;
     void this.invoke('set_overlay_visibility', { visible });

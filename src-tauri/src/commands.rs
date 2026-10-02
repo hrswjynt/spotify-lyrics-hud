@@ -72,6 +72,31 @@ pub fn set_overlay_geometry(
 }
 
 #[tauri::command]
+pub fn set_overlay_size(
+    window: WebviewWindow,
+    width: u32,
+    height: u32,
+) -> Result<(), String> {
+    eprintln!("[set_overlay_size] w={}, h={}", width, height);
+
+    // 1. Size update (Tauri webview window size)
+    let _ = window.set_size(Size::Physical(PhysicalSize::new(width, height)));
+
+    // 2. If on Hyprland, resize while preserving the current center position
+    if std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
+        let script = format!(
+            r#"local wins = hl.get_windows(); for _, w in ipairs(wins) do if w.class == "desktop-overlay" then local cx = w.at.x + w.size.x / 2; local cy = w.at.y + w.size.y / 2; local nx = math.floor(cx - {} / 2); local ny = math.floor(cy - {} / 2); hl.dispatch(hl.dsp.window.resize({{ window = w, x = {}, y = {}, relative = false }})); hl.dispatch(hl.dsp.window.move({{ window = w, x = nx, y = ny, relative = false }})) end end"#,
+            width, height, width, height
+        );
+        let _ = Command::new("hyprctl")
+            .args(["repl", &script])
+            .output();
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 pub fn set_overlay_visibility(window: WebviewWindow, visible: bool) -> Result<(), String> {
     if visible {
         window.show().map_err(|e| e.to_string())

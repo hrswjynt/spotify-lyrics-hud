@@ -34,6 +34,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::set_click_through,
             commands::set_overlay_geometry,
+            commands::set_overlay_size,
             commands::set_overlay_visibility,
             commands::set_overlay_z_order,
             commands::get_native_monitors,
