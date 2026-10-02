@@ -9,6 +9,7 @@ export type HighlightThemeOption = 'emerald' | 'cyan' | 'violet' | 'white';
 export type InactiveOpacityOption = 'subtle' | 'balanced' | 'clear';
 export type BackgroundStyleOption = 'glass' | 'minimal' | 'solid';
 export type ScaleOption = '0.5' | '0.75' | '1' | '1.25' | '1.5';
+export type JapaneseLyricsModeOption = 'dual' | 'romaji' | 'original';
 
 export interface DisplaySettings {
   fontSize: FontSizeOption;
@@ -20,6 +21,7 @@ export interface DisplaySettings {
   inactiveOpacity: InactiveOpacityOption;
   backgroundStyle: BackgroundStyleOption;
   scale: ScaleOption;
+  japaneseMode: JapaneseLyricsModeOption;
 }
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
@@ -32,6 +34,7 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   inactiveOpacity: 'balanced',
   backgroundStyle: 'glass',
   scale: '1',
+  japaneseMode: 'dual',
 };
 
 const STORAGE_KEY = 'overlay_display_settings';

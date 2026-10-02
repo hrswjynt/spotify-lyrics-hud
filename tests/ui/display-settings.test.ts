@@ -99,4 +99,18 @@ describe('displaySettings Store', () => {
       expect(current.scale).toBe(s);
     }
   });
+
+  it('supports japaneseMode options (dual, romaji, original)', () => {
+    expect(DEFAULT_DISPLAY_SETTINGS.japaneseMode).toBe('dual');
+
+    for (const mode of ['dual', 'romaji', 'original'] as const) {
+      updateDisplaySettings({ japaneseMode: mode });
+      let current: any;
+      const unsub = displaySettings.subscribe((val) => {
+        current = val;
+      });
+      unsub();
+      expect(current.japaneseMode).toBe(mode);
+    }
+  });
 });
