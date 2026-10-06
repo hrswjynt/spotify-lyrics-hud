@@ -49,7 +49,7 @@
 | TASK-47 | UI: Add Japanese Lyrics mode selector to SettingsModal.svelte | Completed | TASK-46 |
 | TASK-48 | Verification: End-to-end testing, local compilation & live verification | Completed | TASK-47 |
 | TASK-49 | Rust: Native Multi-Artist Enrichment Module & Regex Parser with Unit Tests | Completed | TASK-48 |
-| TASK-50 | Tauri: Register enrich_track_metadata IPC Command & Track ID Sanitizer | In Progress | TASK-49 |
-| TASK-51 | Data: Sanitize DBus MPRIS Track ID in dbus-mpris.ts & Unit Tests | Pending | TASK-50 |
+| TASK-50 | Tauri: Register enrich_track_metadata IPC Command & Track ID Sanitizer | Completed | TASK-49 |
+| TASK-51 | Data: Sanitize DBus MPRIS Track ID in dbus-mpris.ts & Unit Tests | In Progress | TASK-50 |
 | TASK-52 | UI: Asynchronous Enrichment Pipeline with Race Prevention & LRCLIB Fallback | Pending | TASK-51 |
 | TASK-53 | Release: Bump to v0.2.6, Full Verification, Local Deployment & Release Matrix Push | Pending | TASK-52 |

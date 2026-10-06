@@ -31,6 +31,7 @@ pub struct NativeSpotifyStatus {
     pub album_art_url: Option<String>,
     pub duration_ms: u64,
     pub position_ms: u64,
+    pub track_id: Option<String>,
 }
 
 
@@ -230,6 +231,7 @@ fn query_spotify_windows() -> Result<Option<NativeSpotifyStatus>, String> {
                 album_art_url: None,
                 duration_ms: 0,
                 position_ms: 0,
+                track_id: None,
             });
             return 0;
         }
@@ -243,6 +245,7 @@ fn query_spotify_windows() -> Result<Option<NativeSpotifyStatus>, String> {
                 album_art_url: None,
                 duration_ms: 0,
                 position_ms: 0,
+                track_id: None,
             });
             return 0;
         }
@@ -345,7 +348,7 @@ pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
                 "spotify",
                 "metadata",
                 "--format",
-                "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}:::{{mpris:artUrl}}",
+                "{{title}}:::{{artist}}:::{{album}}:::{{mpris:length}}:::{{position}}:::{{mpris:artUrl}}:::{{mpris:trackid}}",
             ])
             .output();
 
@@ -370,6 +373,16 @@ pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
         } else {
             None
         };
+        let track_id = if parts.len() >= 7 && !parts[6].is_empty() {
+            let clean = crate::enrichment::sanitize_track_id(parts[6]);
+            if !clean.is_empty() {
+                Some(clean)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
 
         Ok(Some(NativeSpotifyStatus {
             status: status_str,
@@ -379,6 +392,7 @@ pub fn query_spotify_mpris() -> Result<Option<NativeSpotifyStatus>, String> {
             album_art_url,
             duration_ms: length_us / 1000,
             position_ms: position_us / 1000,
+            track_id,
         }))
     }
 
@@ -498,6 +512,11 @@ pub fn fetch_lyrics_lrclib(
 #[tauri::command]
 pub fn convert_lyrics_to_romaji(lines: Vec<String>) -> Result<Vec<Option<String>>, String> {
     Ok(crate::romaji::transliterate_lines(&lines))
+}
+
+#[tauri::command]
+pub fn enrich_track_metadata(track_id: String) -> Result<Option<String>, String> {
+    Ok(crate::enrichment::fetch_and_enrich(&track_id))
 }
 
 
