@@ -1,4 +1,5 @@
 pub mod commands;
+pub mod enrichment;
 pub mod romaji;
 pub mod tray;
 
