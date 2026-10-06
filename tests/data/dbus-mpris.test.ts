@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   DbusMprisClient,
   MprisCommandRunner,
+  sanitizeTrackId,
 } from '../../src/data/mpris/dbus-mpris.js';
 import { SpotifyTrack } from '../../src/data/types.js';
 
@@ -90,5 +91,14 @@ describe('Linux DBus MPRIS Client', () => {
 
     await client.previous();
     expect(mockRunner.previous).toHaveBeenCalled();
+  });
+
+  it('sanitizes track id from various MPRIS and URL formats', () => {
+    expect(sanitizeTrackId('/com/spotify/track/3f1ChZHm6v4KdUaEW5y5qd')).toBe('3f1ChZHm6v4KdUaEW5y5qd');
+    expect(sanitizeTrackId('spotify:track:3f1ChZHm6v4KdUaEW5y5qd')).toBe('3f1ChZHm6v4KdUaEW5y5qd');
+    expect(sanitizeTrackId('https://open.spotify.com/track/3f1ChZHm6v4KdUaEW5y5qd?si=xyz')).toBe('3f1ChZHm6v4KdUaEW5y5qd');
+    expect(sanitizeTrackId('3f1ChZHm6v4KdUaEW5y5qd')).toBe('3f1ChZHm6v4KdUaEW5y5qd');
+    expect(sanitizeTrackId(undefined)).toBeUndefined();
+    expect(sanitizeTrackId('')).toBeUndefined();
   });
 });

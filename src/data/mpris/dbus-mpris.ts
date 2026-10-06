@@ -27,6 +27,25 @@ export interface MprisCommandRunner {
   previous(): Promise<void>;
 }
 
+export function sanitizeTrackId(rawId?: string): string | undefined {
+  if (!rawId) return undefined;
+  let id = rawId.trim();
+  const trackIdx = id.lastIndexOf('/track/');
+  if (trackIdx !== -1) {
+    id = id.substring(trackIdx + 7);
+  } else {
+    const colonIdx = id.lastIndexOf('track:');
+    if (colonIdx !== -1) {
+      id = id.substring(colonIdx + 6);
+    }
+  }
+  const qIdx = id.indexOf('?');
+  if (qIdx !== -1) id = id.substring(0, qIdx);
+  const hIdx = id.indexOf('#');
+  if (hIdx !== -1) id = id.substring(0, hIdx);
+  return id || undefined;
+}
+
 /**
  * Standard implementation using Linux playerctl CLI tool to interact with DBus MPRIS.
  */
@@ -70,15 +89,17 @@ export class PlayerctlRunner implements MprisCommandRunner {
       const line = stdout.trim();
       if (!line) return null;
 
-      const [title, artist, album, lengthStr, artUrl, trackId] = line.split(':::');
+      const [title, artist, album, lengthStr, artUrl, rawTrackId] = line.split(':::');
       if (!title || !artist) return null;
 
       // length in microseconds from mpris:length -> convert to ms
       const lengthMicros = parseInt(lengthStr, 10) || 0;
       const durationMs = Math.round(lengthMicros / 1000);
 
+      const trackId = sanitizeTrackId(rawTrackId);
+
       return {
-        id: trackId || undefined,
+        id: trackId,
         title,
         artist,
         album: album || '',
