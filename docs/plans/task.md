@@ -51,5 +51,5 @@
 | TASK-49 | Rust: Native Multi-Artist Enrichment Module & Regex Parser with Unit Tests | Completed | TASK-48 |
 | TASK-50 | Tauri: Register enrich_track_metadata IPC Command & Track ID Sanitizer | Completed | TASK-49 |
 | TASK-51 | Data: Sanitize DBus MPRIS Track ID in dbus-mpris.ts & Unit Tests | Completed | TASK-50 |
-| TASK-52 | UI: Asynchronous Enrichment Pipeline with Race Prevention & LRCLIB Fallback | In Progress | TASK-51 |
-| TASK-53 | Release: Bump to v0.2.6, Full Verification, Local Deployment & Release Matrix Push | Pending | TASK-52 |
+| TASK-52 | UI: Asynchronous Enrichment Pipeline with Race Prevention & LRCLIB Fallback | Completed | TASK-51 |
+| TASK-53 | Release: Bump to v0.2.6, Full Verification, Local Deployment & Release Matrix Push | In Progress | TASK-52 |

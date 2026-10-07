@@ -6,6 +6,7 @@ import {
 } from '../sync/lyrics-sync.js';
 
 export interface TrackInfo {
+  id?: string;
   title: string;
   artist: string;
   album: string;
@@ -86,6 +87,16 @@ export function setTrack(
         ? currentTimeMs
         : (isDifferentTrack ? 0 : s.currentTimeMs),
   }));
+}
+
+export function updateTrackArtist(newArtist: string, trackId?: string): void {
+  currentTrack.update((t) => {
+    if (!t) return null;
+    if (trackId && t.id && t.id !== trackId) {
+      return t;
+    }
+    return { ...t, artist: newArtist };
+  });
 }
 
 

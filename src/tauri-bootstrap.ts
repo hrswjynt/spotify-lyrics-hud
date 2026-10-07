@@ -5,9 +5,26 @@ import { TrayDisplaySettings } from './system/tray/menu-items.js';
 import { SpotifyService } from './data/spotify-service.js';
 import { DbusMprisClient } from './data/mpris/dbus-mpris.js';
 import { TauriMprisRunner } from './data/mpris/tauri-mpris-runner.js';
-import { setTrack, setPlaying, updateProgress, karaokeMode, setKaraokeMode } from './ui/src/stores/playback.js';
+import { setTrack, updateTrackArtist, setPlaying, updateProgress, karaokeMode, setKaraokeMode } from './ui/src/stores/playback.js';
 import { displaySettings, updateDisplaySettings } from './ui/src/stores/display-settings.js';
 import { onUIIntentChange, syncWithEngineState } from './ui/src/stores/overlay.js';
+
+export function resolveEnrichedArtist(
+  primaryArtist: string,
+  scrapedArtist?: string | null,
+  lrclibArtist?: string | null
+): string {
+  if (scrapedArtist && scrapedArtist.trim().length > 0) {
+    return scrapedArtist.trim();
+  }
+  if (lrclibArtist) {
+    const trimmed = lrclibArtist.trim();
+    if (/[,/&]|feat\./i.test(trimmed)) {
+      return trimmed.replace(/\s*\/\s*/g, ', ');
+    }
+  }
+  return primaryArtist;
+}
 
 export async function initTauriRuntime(): Promise<{
   engine: OverlayEngine;
@@ -72,6 +89,8 @@ export async function initTauriRuntime(): Promise<{
     pollIntervalMs: 1000,
   });
 
+  let activeEnrichmentTrackId: string | null = null;
+
   // Sync Spotify changes to UI stores
   spotify.onTrack(async (track, rawLyrics) => {
     void invoke('log_from_js', {
@@ -99,8 +118,12 @@ export async function initTauriRuntime(): Promise<{
       }
     }
 
+    const activeId = track.id;
+    activeEnrichmentTrackId = activeId || null;
+
     setTrack(
       {
+        id: activeId,
         title: track.title,
         artist: track.artist,
         album: track.album,
@@ -111,6 +134,27 @@ export async function initTauriRuntime(): Promise<{
       spotify.getCurrentPositionMs(),
       spotify.getIsPlaying()
     );
+
+    // Asynchronously enrich metadata for multi-artist collaborations
+    if (activeId) {
+      void (async () => {
+        try {
+          const scrapedArtist = await invoke<string | null>('enrich_track_metadata', {
+            trackId: activeId,
+          });
+          const enriched = resolveEnrichedArtist(track.artist, scrapedArtist);
+          if (activeEnrichmentTrackId === activeId && enriched !== track.artist) {
+            updateTrackArtist(enriched, activeId);
+            void invoke('log_from_js', {
+              level: 'INFO',
+              msg: `Enriched artist for "${track.title}": "${enriched}"`,
+            });
+          }
+        } catch (err) {
+          console.warn('[Enrichment] Failed to enrich track metadata:', err);
+        }
+      })();
+    }
   });
 
   spotify.onStatus((status) => {
