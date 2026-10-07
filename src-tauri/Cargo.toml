@@ -1,6 +1,6 @@
 [package]
 name = "spotify-lyrics-hud"
-version = "0.2.5"
+version = "0.2.6"
 description = "Cross-Platform Native Desktop Overlay HUD"
 authors = ["Antigravity"]
 edition = "2021"
